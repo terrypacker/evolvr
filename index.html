@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://terrypacker.com/assets/css/base.css">
   <link rel="stylesheet" href="https://terrypacker.com/assets/css/theme-amber.css">
   <link rel="stylesheet" href="assets/css/evo-sim.css">
+  <link rel="stylesheet" href="assets/css/modals.css">
 </head>
 <body>
 <div id="app">
@@ -93,7 +94,10 @@
         </div>
         <div class="divider" style="margin:0 14px"></div>
         <div class="panel-body-compact">
-          <label class="field-label">ORGANISM TYPE WEIGHTS</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <label class="field-label" style="margin:0">ORGANISM TYPES</label>
+            <button class="btn btn-sm" id="btnEditTypes">✎ EDIT TYPES</button>
+          </div>
           <div id="typeWeightControls"></div>
         </div>
       </div>
@@ -104,6 +108,7 @@
           <span class="panel-tag">DNA</span>
           <span class="panel-title">GENE REGISTRY</span>
           <span class="badge-purple" id="geneBadge">0 genes</span>
+          <button class="btn btn-xs btn-ghost" id="btnEditGenes" style="margin-left:4px">✎ EDIT</button>
         </div>
         <div class="gene-list" id="geneList" style="overflow-y:auto;flex:1"></div>
       </div>
@@ -211,12 +216,13 @@
     <span>Genetic Algorithm Playground</span>
     <span>·</span>
     <span>Edit <code>problems.js</code> to add new problems &amp; genes</span>
+    <span style="margin-left:auto">base.css + theme-amber.css + evo-sim.css</span>
   </div>
 
 </div>
 
 <!-- ES module entry point -->
-<script type="module" src="./assets/js/app.js"></script>
+<script type="module" src="assets/js/app.js"></script>
 
 <!-- Post-init: update gene badge count -->
 <script type="module">

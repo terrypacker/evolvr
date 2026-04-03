@@ -20,17 +20,20 @@
 export const GeneRegistry = (() => {
   const _genes = new Map();
 
-  return {
+  const api = {
     register(name, types, fn) {
       _genes.set(name, { name, types, fn });
     },
+    delete(name) { _genes.delete(name); },
     get(name) { return _genes.get(name); },
     forType(type) {
       return [..._genes.values()].filter(g => g.types.includes(type));
     },
     allNames() { return [..._genes.keys()]; },
-    all() { return [..._genes.values()]; }
+    all() { return [..._genes.values()]; },
+    get _genes() { return _genes; }
   };
+  return api;
 })();
 
 /* ── ORGANISM TYPE REGISTRY ───────────────────────────────────
@@ -54,9 +57,11 @@ export const OrganismTypes = (() => {
 
   return {
     register(def) { _types.set(def.id, def); },
+    delete(id) { _types.delete(id); },
     get(id) { return _types.get(id); },
     all() { return [..._types.values()]; },
-    ids() { return [..._types.keys()]; }
+    ids() { return [..._types.keys()]; },
+    get _types() { return _types; }
   };
 })();
 

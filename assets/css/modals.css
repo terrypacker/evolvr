@@ -1,0 +1,319 @@
+/* =============================================================
+   MODALS.CSS  —  Organism Type Editor & Gene Editor
+   Load after evo-sim.css
+   ============================================================= */
+
+/* ── OVERLAY ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  backdrop-filter: blur(3px);
+}
+.modal-overlay.modal-visible { opacity: 1; }
+
+/* ── BOX ── */
+.modal-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hi);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.8), 0 0 0 1px var(--amber-dim) inset;
+  transform: translateY(8px);
+  transition: transform 0.18s ease;
+  overflow: hidden;
+}
+.modal-overlay.modal-visible .modal-box { transform: translateY(0); }
+
+/* ── MODAL HEADER ── */
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--bg-panel2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.modal-title {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  color: var(--text-primary);
+  flex: 1;
+}
+.modal-close {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-color: transparent;
+}
+.modal-close:hover { color: var(--red); border-color: var(--red-dim); }
+
+/* ── MODAL BODY ── */
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+.modal-body::-webkit-scrollbar { width: 4px; }
+
+/* ── MODAL FOOTER ── */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg-panel2);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.modal-footer .btn:first-child:not(:last-child):not(.btn-warn) { margin-right: auto; }
+.modal-footer .btn-warn { margin-right: auto; }
+
+/* ── FORM LAYOUT ── */
+.modal-form { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+.mf-group { display: flex; flex-direction: column; }
+.mf-row   { display: flex; gap: 10px; }
+.mf-flex1 { flex: 1; }
+.mf-flex2 { flex: 2; }
+
+/* ── COLOUR PALETTE ── */
+.color-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 2px;
+}
+.color-swatch {
+  width: 22px; height: 22px;
+  border-radius: 3px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+  flex-shrink: 0;
+}
+.color-swatch:hover         { transform: scale(1.2); }
+.color-swatch.color-swatch-sel {
+  border-color: white;
+  transform: scale(1.15);
+  box-shadow: 0 0 8px currentColor;
+}
+.color-preview {
+  width: 28px; height: 28px;
+  border-radius: 3px;
+  border: 1px solid var(--border-hi);
+  flex-shrink: 0;
+}
+
+/* ── GENE CHIP GRID ── */
+.gene-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+.gene-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 3px;
+  border: 1px solid var(--border-hi);
+  background: var(--bg-input);
+  cursor: pointer;
+  transition: all 0.12s;
+  user-select: none;
+}
+.gene-chip:hover { border-color: var(--amber-dim); background: var(--bg-panel2); }
+.gene-chip-name  { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+.gene-chip-check { font-size: 10px; color: var(--amber); opacity: 0; transition: opacity 0.12s; }
+
+.gene-chip.gene-chip-on {
+  background: var(--amber-glow);
+  border-color: var(--amber-dim);
+}
+.gene-chip.gene-chip-on .gene-chip-name  { color: var(--amber); }
+.gene-chip.gene-chip-on .gene-chip-check { opacity: 1; }
+
+/* Type chips in gene editor (coloured) */
+.type-chip { font-family: var(--font-head); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; }
+.type-chip .gene-chip-name { font-family: var(--font-head); font-size: 11px; }
+.type-chip .gene-chip-check { color: inherit; }
+
+/* ── GENE SELECTOR COUNT BADGE ── */
+.gene-sel-count {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--amber);
+  background: var(--amber-glow);
+  border: 1px solid var(--amber-dim);
+  padding: 1px 6px;
+  border-radius: 2px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.gene-pool-note {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 5px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ── CODE EDITOR (gene function) ── */
+.code-editor {
+  width: 100%;
+  background: #060910;
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius);
+  color: #abb2c0;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  padding: 10px 12px;
+  resize: vertical;
+  outline: none;
+  tab-size: 2;
+  min-height: 160px;
+}
+.code-editor:focus { border-color: var(--amber-dim); }
+.code-error {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--red);
+  margin-top: 4px;
+  min-height: 14px;
+  line-height: 1.4;
+}
+
+/* ── GENE TEST OUTPUT ── */
+.gene-test-result {
+  margin-top: 8px;
+  background: #060910;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.8;
+}
+.test-in  { color: var(--text-muted); }
+.test-out { color: var(--green); }
+
+/* ── ORGANISM TYPE LIST (in list modal) ── */
+.type-list-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+.type-list-row:hover   { background: var(--bg-panel2); }
+.type-list-row:last-child { border-bottom: none; }
+
+.type-list-swatch {
+  width: 44px; height: 44px;
+  border-radius: 4px;
+  border: 1px solid;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.type-list-info { flex: 1; min-width: 0; }
+.type-list-name {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  margin-bottom: 2px;
+}
+.type-list-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+.type-list-meta {
+  display: flex;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.type-gene-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.type-list-edit {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* ── GENE LIST (in list modal) ── */
+.gene-list-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+.gene-list-row:hover { background: var(--bg-panel2); }
+.gene-list-row:last-child { border-bottom: none; }
+
+.gene-list-info { flex: 1; min-width: 0; }
+.gene-list-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+.gene-type-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+.gene-list-edit { flex-shrink: 0; }
+
+/* ── SHARED MINI TAG ── */
+.gene-mini-tag {
+  font-family: var(--font-head);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  padding: 1px 5px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--bg-panel2);
+}
+
+/* ── SHAKE ANIMATION (validation error) ── */
+@keyframes modal-shake {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-6px); }
+  40%     { transform: translateX(6px); }
+  60%     { transform: translateX(-4px); }
+  80%     { transform: translateX(4px); }
+}
+.modal-shake { animation: modal-shake 0.35s ease; }
+
+/* ── WIDER BOX for gene editor (code textarea needs room) ── */
+#geneModal .modal-box { max-width: 700px; }
+
+/* ── SELECTED GENE COUNT IN FIELD LABEL ── */
+.field-label .gene-sel-count { vertical-align: middle; }

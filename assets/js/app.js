@@ -4,6 +4,7 @@
 
 import { Population, OrganismTypes, GeneRegistry } from './engine.js';
 import { Problems } from './problems.js';
+import { openOrganismList, openGeneList } from './modals.js';
 
 /* ── ORGANISM TYPE DEFINITIONS ──────────────────────────────── */
 OrganismTypes.register({
@@ -97,6 +98,20 @@ function init() {
   resetSim();
   wireEvents();
   renderLoop();
+}
+
+/* Called after organism types or genes change in the editor */
+function onRegistryChanged() {
+  buildTypeWeightControls();
+  buildGenePanel();
+  for (const t of OrganismTypes.all()) {
+    if (!(t.id in state.typeWeights)) state.typeWeights[t.id] = 25;
+  }
+  for (const tid of Object.keys(state.typeWeights)) {
+    if (!OrganismTypes.get(tid)) delete state.typeWeights[tid];
+  }
+  const badge = document.getElementById('geneBadge');
+  if (badge) badge.textContent = GeneRegistry.all().length + ' genes';
 }
 
 /* ── BUILD UI ─────────────────────────────────────────────────*/
@@ -407,6 +422,14 @@ function wireEvents() {
     el.addEventListener('change', () => {
       // Only apply on reset
     });
+  });
+
+  // Modal buttons in CFG panel
+  document.getElementById('btnEditTypes')?.addEventListener('click', () => {
+    openOrganismList(onRegistryChanged);
+  });
+  document.getElementById('btnEditGenes')?.addEventListener('click', () => {
+    openGeneList(onRegistryChanged);
   });
 
   // Resize canvas on window resize
