@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" class="scanlines">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVOLVR — Genetic Algorithm Playground</title>
+
+  <!-- CSS load order: base → theme → page -->
+  <link rel="stylesheet" href="https://terrypacker.com/assets/css/base.css">
+  <link rel="stylesheet" href="https://terrypacker.com/assets/css/theme-amber.css">
+  <link rel="stylesheet" href="assets/css/evo-sim.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════ -->
+  <header id="header">
+    <div class="header-left">
+      <div class="logo-mark">⬡</div>
+      <div>
+        <div class="app-title">EVOLVR</div>
+        <div class="app-subtitle">GENETIC ALGORITHM PLAYGROUND</div>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <div class="sim-status-row">
+        <div class="status-dot stopped" id="statusDot"></div>
+        <span id="simStatus">STOPPED</span>
+      </div>
+      <span class="sim-gen-display" id="simGen">GEN 0</span>
+
+      <div class="time-controls">
+        <button class="btn btn-primary" id="btnStart">▶ RUN</button>
+        <button class="btn" id="btnStep">↷ STEP</button>
+        <button class="btn btn-warn btn-sm" id="btnReset">⟳ RESET</button>
+      </div>
+
+      <div class="speed-wrap">
+        <span class="lbl">SPEED</span>
+        <input type="range" id="speedRange" min="1" max="20" value="1">
+        <span class="val" id="speedVal">1×</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="panel-tag">v1.0</span>
+    </div>
+  </header>
+
+  <!-- ══ MAIN GRID ════════════════════════════════════════════ -->
+  <div id="mainGrid">
+
+    <!-- ── LEFT COLUMN: config ────────────────────────────── -->
+    <div class="left-col">
+
+      <!-- Problem Selection -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-tag">PROB</span>
+          <span class="panel-title">PROBLEM</span>
+        </div>
+        <div class="problem-wrap">
+          <label class="field-label">Optimization target</label>
+          <select class="field-select" id="problemSel"></select>
+          <div class="problem-desc" id="problemDesc"></div>
+          <div style="margin-top:10px">
+            <label class="field-label" id="goalLabel">Goal</label>
+            <select class="field-select" id="goalSel"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Population Config -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-tag">CFG</span>
+          <span class="panel-title">PARAMETERS</span>
+        </div>
+        <div class="config-row">
+          <div class="config-item">
+            <label>Max Pop</label>
+            <input type="number" id="maxPopInput" value="40" min="10" max="200">
+          </div>
+          <div class="config-item">
+            <label>Mut% Rate</label>
+            <input type="number" id="mutRateInput" value="10" min="1" max="50">
+          </div>
+          <div class="config-item">
+            <label>Mut% Scale</label>
+            <input type="number" id="mutScaleInput" value="20" min="1" max="80">
+          </div>
+        </div>
+        <div class="divider" style="margin:0 14px"></div>
+        <div class="panel-body-compact">
+          <label class="field-label">ORGANISM TYPE WEIGHTS</label>
+          <div id="typeWeightControls"></div>
+        </div>
+      </div>
+
+      <!-- Gene Registry -->
+      <div class="panel" style="flex:1;min-height:0">
+        <div class="panel-header">
+          <span class="panel-tag">DNA</span>
+          <span class="panel-title">GENE REGISTRY</span>
+          <span class="badge-purple" id="geneBadge">0 genes</span>
+        </div>
+        <div class="gene-list" id="geneList" style="overflow-y:auto;flex:1"></div>
+      </div>
+
+    </div>
+
+    <!-- ── CENTER COLUMN: viz + charts ──────────────────────── -->
+    <div class="center-col">
+
+      <!-- Dashboard cards -->
+      <div class="panel" style="flex-shrink:0">
+        <div class="panel-header">
+          <span class="panel-tag">LIVE</span>
+          <span class="panel-title">DASHBOARD</span>
+        </div>
+        <div class="dash-cards">
+          <div class="dash-card">
+            <div class="dc-label">Generation</div>
+            <div class="dc-value" id="cardGen">0</div>
+          </div>
+          <div class="dash-card">
+            <div class="dc-label">Best Fitness</div>
+            <div class="dc-value" id="cardBest">—</div>
+          </div>
+          <div class="dash-card">
+            <div class="dc-label">Avg Fitness</div>
+            <div class="dc-value" id="cardAvg">—</div>
+          </div>
+          <div class="dash-card">
+            <div class="dc-label">Population</div>
+            <div class="dc-value" id="cardPop">0</div>
+          </div>
+          <div class="dash-card dc-goal">
+            <div class="dc-label">Goal</div>
+            <div class="dc-value" id="cardGoalHit">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualization canvas -->
+      <div class="panel" style="flex:1;min-height:0">
+        <div class="panel-header">
+          <span class="panel-tag">VIZ</span>
+          <span class="panel-title">LIVE POPULATION VIEW</span>
+        </div>
+        <div class="viz-wrap" style="flex:1;margin:10px;border-radius:4px;overflow:hidden">
+          <canvas id="vizCanvas"></canvas>
+          <div class="viz-overlay" id="vizOverlay">POPULATION VISUALIZATION</div>
+        </div>
+      </div>
+
+      <!-- Mini charts -->
+      <div class="panel" style="flex-shrink:0">
+        <div class="panel-header">
+          <span class="panel-tag">HIST</span>
+          <span class="panel-title">FITNESS HISTORY</span>
+          <span style="margin-left:auto;font-family:var(--font-mono);font-size:9px;color:var(--amber-dim)">━ BEST</span>
+          <span style="margin-left:8px;font-family:var(--font-mono);font-size:9px;color:var(--text-muted)">━ AVG</span>
+        </div>
+        <div class="mini-chart-wrap">
+          <canvas id="fitnessChart" height="60" style="height:60px"></canvas>
+        </div>
+        <div style="padding:0 14px 8px">
+          <div class="mini-chart-label">
+            <span>TYPE DISTRIBUTION</span>
+          </div>
+          <canvas id="typeChart" height="16" style="height:16px;border-radius:2px"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT COLUMN: population + events ──────────────── -->
+    <div class="right-col">
+
+      <!-- Population list -->
+      <div class="panel" style="flex:1;min-height:0">
+        <div class="panel-header">
+          <span class="panel-tag">POP</span>
+          <span class="panel-title">ORGANISMS</span>
+          <span class="badge-green" style="margin-left:auto" id="popBadge">TOP 20</span>
+        </div>
+        <div style="display:grid;grid-template-columns:34px 60px 58px 28px 1fr;gap:4px;padding:4px 14px;font-size:9px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border)">
+          <span>ID</span><span>TYPE</span><span>FITNESS</span><span>AGE</span><span>GENOME</span>
+        </div>
+        <div class="pop-list-wrap" id="popList"></div>
+      </div>
+
+      <!-- Event log -->
+      <div class="panel" style="flex:0 0 220px;min-height:0">
+        <div class="panel-header">
+          <span class="panel-tag">LOG</span>
+          <span class="panel-title">EVENT STREAM</span>
+        </div>
+        <div class="event-log-wrap" id="eventLog"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ STATUS BAR ══════════════════════════════════════════ -->
+  <div id="statusBar">
+    <span>EVOLVR</span>
+    <span>·</span>
+    <span>Genetic Algorithm Playground</span>
+    <span>·</span>
+    <span>Edit <code>problems.js</code> to add new problems &amp; genes</span>
+  </div>
+
+</div>
+
+<!-- ES module entry point -->
+<script type="module" src="./assets/js/app.js"></script>
+
+<!-- Post-init: update gene badge count -->
+<script type="module">
+  import { GeneRegistry } from './assets/js/engine.js';
+  import './assets/js/problems.js'; // trigger gene registration
+  window.addEventListener('DOMContentLoaded', () => {
+    const badge = document.getElementById('geneBadge');
+    if (badge) setTimeout(() => {
+      badge.textContent = GeneRegistry.all().length + ' genes';
+    }, 100);
+  });
+</script>
+</body>
+</html>
