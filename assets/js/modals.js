@@ -544,7 +544,7 @@ function showModalError(overlay, msg) {
 function extractFnBody(fn) {
   try {
     const src   = fn.toString();
-    const match = src.match(/^\s*(?:function[^{]*)?\{([\s\S]*)\}\s*$/);
+    const match = src.match(/\{([\s\S]*)\}/);
     if (match) return match[1].replace(/^\n/, '').replace(/\n\s*$/, '');
     return src;
   } catch {
