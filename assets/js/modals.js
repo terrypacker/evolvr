@@ -13,8 +13,45 @@ const PALETTE = [
 ];
 
 /* ══════════════════════════════════════════════════════════════
-   SHARED MODAL SCAFFOLDING
+   MODAL STACK
+   ──────────────────────────────────────────────────────────────
+   Instead of closing the list modal before opening the editor,
+   we keep both in the DOM simultaneously. The list slides to the
+   left (pushed back) while the editor slides in from the right.
+   Closing/cancelling the editor reverses the animation and
+   reveals the list again — a natural drill-down / back pattern.
    ══════════════════════════════════════════════════════════════ */
+function pushModal(overlay) {
+  /* Slide any currently-visible modal-box to the left (behind) */
+  document.querySelectorAll('.modal-overlay.modal-visible .modal-box').forEach(box => {
+    box.classList.add('modal-box-behind');
+  });
+  requestAnimationFrame(() => overlay.classList.add('modal-visible'));
+}
+
+function popModal(id, onPopped) {
+  const el = document.getElementById(id);
+  if (!el) { onPopped?.(); return; }
+
+  el.classList.remove('modal-visible');
+  el.addEventListener('transitionend', () => {
+    el.remove();
+    /* Restore the previous modal-box to centre */
+    document.querySelectorAll('.modal-overlay.modal-visible .modal-box').forEach(box => {
+      box.classList.remove('modal-box-behind');
+    });
+    onPopped?.();
+  }, { once: true });
+}
+
+/* Full close — removes all modals in the stack */
+export function closeModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('modal-visible');
+  el.addEventListener('transitionend', () => el.remove(), { once: true });
+}
+
 function createModal(id, title, bodyHTML, footerHTML) {
   document.getElementById(id)?.remove();
 
@@ -26,7 +63,7 @@ function createModal(id, title, bodyHTML, footerHTML) {
       <div class="modal-header">
         <span class="panel-tag">CFG</span>
         <span class="modal-title">${title}</span>
-        <button class="modal-close btn btn-ghost btn-sm" data-close="${id}">✕</button>
+        <button class="modal-close btn btn-ghost btn-sm" aria-label="Close">&#x2715;</button>
       </div>
       <div class="modal-body">${bodyHTML}</div>
       <div class="modal-footer">${footerHTML}</div>
@@ -35,63 +72,76 @@ function createModal(id, title, bodyHTML, footerHTML) {
 
   document.body.appendChild(overlay);
 
+  /* Clicking the backdrop closes the entire stack */
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay || e.target.dataset.close === id) closeModal(id);
+    if (e.target === overlay) closeAllModals();
   });
+  overlay.querySelector('.modal-close').addEventListener('click', closeAllModals);
 
   const escHandler = (e) => {
-    if (e.key === 'Escape') { closeModal(id); document.removeEventListener('keydown', escHandler); }
+    if (e.key === 'Escape') {
+      closeAllModals();
+      document.removeEventListener('keydown', escHandler);
+    }
   };
   document.addEventListener('keydown', escHandler);
 
-  requestAnimationFrame(() => overlay.classList.add('modal-visible'));
   return overlay;
 }
 
-export function closeModal(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.classList.remove('modal-visible');
-  el.addEventListener('transitionend', () => el.remove(), { once: true });
-}
-
-/* ══════════════════════════════════════════════════════════════
-   ORGANISM TYPE LIST MODAL
-   ══════════════════════════════════════════════════════════════ */
-export function openOrganismList(onChanged) {
-  const body = `<div id="otl_list">${buildTypeListInner(onChanged)}</div>`;
-  const footer = `
-    <button class="btn" data-close="orgListModal">CLOSE</button>
-    <button class="btn btn-primary" id="otl_new">⊕ NEW TYPE</button>
-  `;
-
-  const modal = createModal('orgListModal', 'ORGANISM TYPES', body, footer);
-
-  wireTypeListEdits(modal, onChanged);
-
-  modal.querySelector('#otl_new').addEventListener('click', () => {
-    closeModal('orgListModal');
-    openOrganismEditor(null, () => {
-      onChanged?.();
-      openOrganismList(onChanged);
-    });
+function closeAllModals() {
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.classList.remove('modal-visible');
+    el.addEventListener('transitionend', () => el.remove(), { once: true });
   });
 }
 
-function buildTypeListInner(onChanged) {
-  const types = OrganismTypes.all();
-  if (!types.length) return '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px">No organism types defined.</div>';
+/* ══════════════════════════════════════════════════════════════
+   ORGANISM TYPE LIST
+   ══════════════════════════════════════════════════════════════ */
+export function openOrganismList(onChanged) {
+  const body = `<div id="otl_list">${buildTypeListInner()}</div>`;
+  const footer = `
+    <button class="btn" id="otl_close">CLOSE</button>
+    <button class="btn btn-primary" id="otl_new">&#x2295; NEW TYPE</button>
+  `;
 
+  const modal = createModal('orgListModal', 'ORGANISM TYPES', body, footer);
+  pushModal(modal);
+
+  /* Wire edit buttons via delegation */
+  modal.querySelector('#otl_list').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-edittype]');
+    if (btn) openOrganismEditor(btn.dataset.edittype, onChanged);
+  });
+
+  modal.querySelector('#otl_new').addEventListener('click', () => {
+    openOrganismEditor(null, onChanged);
+  });
+
+  modal.querySelector('#otl_close').addEventListener('click', closeAllModals);
+}
+
+function refreshTypeList() {
+  const el = document.getElementById('otl_list');
+  if (el) el.innerHTML = buildTypeListInner();
+}
+
+function buildTypeListInner() {
+  const types = OrganismTypes.all();
+  if (!types.length) {
+    return '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px">No organism types defined.</div>';
+  }
   return types.map(t => `
     <div class="type-list-row">
       <div class="type-list-swatch" style="background:${t.color}22;border-color:${t.color}66">
-        <span style="color:${t.color};font-family:var(--font-mono);font-size:20px;line-height:1">⬡</span>
+        <span style="color:${t.color};font-family:var(--font-mono);font-size:20px;line-height:1">&#x2B21;</span>
       </div>
       <div class="type-list-info">
         <div class="type-list-name" style="color:${t.color}">${t.label}
           <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);font-weight:400;margin-left:6px">${t.id}</span>
         </div>
-        <div class="type-list-desc">${t.description || '—'}</div>
+        <div class="type-list-desc">${t.description || '&mdash;'}</div>
         <div class="type-list-meta">
           <span>genome: ${t.genomeLength}</span>
           <span>mut rate: ${Math.round(t.mutationRate * 100)}%</span>
@@ -102,47 +152,31 @@ function buildTypeListInner(onChanged) {
           ${t.genePool.map(g => `<span class="gene-mini-tag">${g}</span>`).join('')}
         </div>
       </div>
-      <button class="btn btn-sm type-list-edit" data-edittype="${t.id}">✎ EDIT</button>
+      <button class="btn btn-sm type-list-edit" data-edittype="${t.id}">&#x270E; EDIT</button>
     </div>
   `).join('');
 }
 
-function wireTypeListEdits(modal, onChanged) {
-  modal.querySelectorAll('[data-edittype]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.edittype;
-      closeModal('orgListModal');
-      openOrganismEditor(id, () => {
-        onChanged?.();
-        openOrganismList(onChanged);
-      });
-    });
-  });
-}
-
 /* ══════════════════════════════════════════════════════════════
-   ORGANISM TYPE EDITOR MODAL
+   ORGANISM TYPE EDITOR
    ══════════════════════════════════════════════════════════════ */
-export function openOrganismEditor(typeId, onSave) {
-  const isEdit   = typeId !== null && typeId !== undefined;
-  const existing = isEdit ? OrganismTypes.get(typeId) : null;
+export function openOrganismEditor(typeId, onChanged) {
+  const isEdit    = typeId != null;
+  const existing  = isEdit ? OrganismTypes.get(typeId) : null;
 
-  const allGenes     = GeneRegistry.all();
   const selectedGenes = new Set(existing?.genePool ?? []);
-  let pickedColor     = existing?.color ?? PALETTE[Math.floor(Math.random() * PALETTE.length)];
+  let   pickedColor   = existing?.color ?? PALETTE[Math.floor(Math.random() * PALETTE.length)];
 
-  /* ── Gene picker chips ── */
-  const genePicker = allGenes.length
-    ? allGenes.map(g => {
+  const genePicker = GeneRegistry.all().length
+    ? GeneRegistry.all().map(g => {
         const on = selectedGenes.has(g.name);
         return `<div class="gene-chip ${on ? 'gene-chip-on' : ''}" data-gene="${g.name}" title="${g.name}">
           <span class="gene-chip-name">${g.name}</span>
-          <span class="gene-chip-check">✓</span>
+          <span class="gene-chip-check">&#x2713;</span>
         </div>`;
       }).join('')
     : '<div style="color:var(--text-muted);font-size:10px;padding:4px">No genes registered yet. Create genes first.</div>';
 
-  /* ── Colour palette ── */
   const colourPicker = PALETTE.map(c =>
     `<div class="color-swatch ${c === pickedColor ? 'color-swatch-sel' : ''}"
           data-color="${c}" style="background:${c}" title="${c}"></div>`
@@ -150,7 +184,6 @@ export function openOrganismEditor(typeId, onSave) {
 
   const bodyHTML = `
     <div class="modal-form">
-
       <div class="mf-row">
         <div class="mf-group mf-flex2">
           <label class="field-label">Display Name</label>
@@ -160,7 +193,8 @@ export function openOrganismEditor(typeId, onSave) {
         <div class="mf-group mf-flex1">
           <label class="field-label">ID <span style="color:var(--text-muted)">(no spaces)</span></label>
           <input class="field-input mono" id="mo_id" placeholder="e.g. drifter"
-                 value="${existing?.id ?? ''}" ${isEdit ? 'readonly style="opacity:0.5;cursor:not-allowed"' : ''}>
+                 value="${existing?.id ?? ''}"
+                 ${isEdit ? 'readonly style="opacity:0.5;cursor:not-allowed"' : ''}>
         </div>
       </div>
 
@@ -208,19 +242,22 @@ export function openOrganismEditor(typeId, onSave) {
         <div class="gene-chip-grid" id="mo_geneGrid">${genePicker}</div>
         <div class="gene-pool-note">Click genes to toggle. Organisms randomly express a subset each generation.</div>
       </div>
-
     </div>
   `;
 
   const footerHTML = `
-    ${isEdit ? `<button class="btn btn-warn btn-sm" id="mo_delete">⊗ DELETE</button>` : ''}
-    <button class="btn" data-close="orgModal">CANCEL</button>
-    <button class="btn btn-primary" id="mo_save">${isEdit ? '✎ SAVE CHANGES' : '⊕ CREATE TYPE'}</button>
+    ${isEdit ? `<button class="btn btn-warn btn-sm" id="mo_delete">&#x2297; DELETE</button>` : ''}
+    <button class="btn" id="mo_back">&#x2190; BACK</button>
+    <button class="btn btn-primary" id="mo_save">${isEdit ? '&#x270E; SAVE CHANGES' : '&#x2295; CREATE TYPE'}</button>
   `;
 
-  const overlay = createModal('orgModal', isEdit ? 'EDIT ORGANISM TYPE' : 'NEW ORGANISM TYPE', bodyHTML, footerHTML);
+  const overlay = createModal('orgModal',
+    isEdit ? `EDIT: ${existing.label.toUpperCase()}` : 'NEW ORGANISM TYPE',
+    bodyHTML, footerHTML
+  );
+  pushModal(overlay);
 
-  /* ── Colour palette wiring ── */
+  /* Colour */
   const updateColor = (hex) => {
     pickedColor = hex;
     overlay.querySelectorAll('.color-swatch').forEach(sw =>
@@ -229,17 +266,15 @@ export function openOrganismEditor(typeId, onSave) {
     overlay.querySelector('#mo_colorHex').value = hex;
     overlay.querySelector('#mo_colorPreview').style.background = hex;
   };
-
   overlay.querySelector('#mo_palette').addEventListener('click', (e) => {
     const sw = e.target.closest('.color-swatch');
     if (sw) updateColor(sw.dataset.color);
   });
-
   overlay.querySelector('#mo_colorHex').addEventListener('input', (e) => {
     if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) updateColor(e.target.value);
   });
 
-  /* ── Gene chip wiring ── */
+  /* Gene chips */
   overlay.querySelector('#mo_geneGrid').addEventListener('click', (e) => {
     const chip = e.target.closest('.gene-chip[data-gene]');
     if (!chip) return;
@@ -249,74 +284,87 @@ export function openOrganismEditor(typeId, onSave) {
     overlay.querySelector('#mo_geneCount').textContent = `${selectedGenes.size} selected`;
   });
 
-  /* ── Delete ── */
+  /* Back — pop editor, list re-appears */
+  overlay.querySelector('#mo_back').addEventListener('click', () => {
+    popModal('orgModal', () => {
+      refreshTypeList();
+    });
+  });
+
+  /* Delete */
   overlay.querySelector('#mo_delete')?.addEventListener('click', () => {
     if (!confirm(`Delete organism type "${existing.label}"?\nThis cannot be undone. Reset the simulation after deleting.`)) return;
     OrganismTypes.delete(typeId);
-    closeModal('orgModal');
-    onSave?.();
+    onChanged?.();
+    popModal('orgModal', () => refreshTypeList());
   });
 
-  /* ── Cancel ── */
-  overlay.querySelector('[data-close="orgModal"]').addEventListener('click', () => closeModal('orgModal'));
-
-  /* ── Save ── */
+  /* Save */
   overlay.querySelector('#mo_save').addEventListener('click', () => {
     const label  = overlay.querySelector('#mo_label').value.trim();
     const rawId  = overlay.querySelector('#mo_id').value.trim();
     const id     = isEdit ? typeId : rawId.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
     const desc   = overlay.querySelector('#mo_desc').value.trim();
-    const gLen   = Math.max(4, Math.min(32, +overlay.querySelector('#mo_glen').value || 12));
-    const mRate  = Math.max(0.01, Math.min(0.8, (+overlay.querySelector('#mo_mrate').value || 12) / 100));
+    const gLen   = Math.max(4, Math.min(32,  +overlay.querySelector('#mo_glen').value   || 12));
+    const mRate  = Math.max(0.01, Math.min(0.8, (+overlay.querySelector('#mo_mrate').value  || 12) / 100));
     const mScale = Math.max(0.01, Math.min(0.8, (+overlay.querySelector('#mo_mscale').value || 20) / 100));
 
-    if (!label)               { showModalError(overlay, 'Display name is required.'); return; }
-    if (!id)                  { showModalError(overlay, 'ID is required.'); return; }
+    if (!label)                           { showModalError(overlay, 'Display name is required.'); return; }
+    if (!id)                              { showModalError(overlay, 'ID is required.'); return; }
     if (!isEdit && OrganismTypes.get(id)) { showModalError(overlay, `ID "${id}" is already in use.`); return; }
-    if (selectedGenes.size === 0) { showModalError(overlay, 'Select at least one gene for the gene pool.'); return; }
+    if (selectedGenes.size === 0)         { showModalError(overlay, 'Select at least one gene for the gene pool.'); return; }
 
     OrganismTypes.register({
       id, label, description: desc, color: pickedColor,
       genomeLength: gLen,
-      genePool: [...selectedGenes],
+      genePool:     [...selectedGenes],
       mutationRate: mRate,
       mutationScale: mScale,
     });
 
-    closeModal('orgModal');
-    onSave?.();
+    onChanged?.();
+    popModal('orgModal', () => refreshTypeList());
   });
 }
 
 /* ══════════════════════════════════════════════════════════════
-   GENE LIST MODAL
+   GENE LIST
    ══════════════════════════════════════════════════════════════ */
 export function openGeneList(onChanged) {
-  const body   = `<div id="gl_list">${buildGeneListInner()}</div>`;
+  const body = `<div id="gl_list">${buildGeneListInner()}</div>`;
   const footer = `
-    <button class="btn" data-close="geneListModal">CLOSE</button>
-    <button class="btn btn-primary" id="gl_new">⊕ NEW GENE</button>
+    <button class="btn" id="gl_close">CLOSE</button>
+    <button class="btn btn-primary" id="gl_new">&#x2295; NEW GENE</button>
   `;
 
   const modal = createModal('geneListModal', 'GENE REGISTRY', body, footer);
-  wireGeneListEdits(modal, onChanged);
+  pushModal(modal);
+
+  modal.querySelector('#gl_list').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-editgene]');
+    if (btn) openGeneEditor(btn.dataset.editgene, onChanged);
+  });
 
   modal.querySelector('#gl_new').addEventListener('click', () => {
-    closeModal('geneListModal');
-    openGeneEditor(null, () => {
-      onChanged?.();
-      openGeneList(onChanged);
-    });
+    openGeneEditor(null, onChanged);
   });
+
+  modal.querySelector('#gl_close').addEventListener('click', closeAllModals);
+}
+
+function refreshGeneList() {
+  const el = document.getElementById('gl_list');
+  if (el) el.innerHTML = buildGeneListInner();
 }
 
 function buildGeneListInner() {
   const genes = GeneRegistry.all();
-  if (!genes.length) return '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px">No genes registered.</div>';
-
+  if (!genes.length) {
+    return '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:11px">No genes registered.</div>';
+  }
   return genes.map(g => {
     const typeTags = g.types.map(tid => {
-      const t = OrganismTypes.get(tid);
+      const t   = OrganismTypes.get(tid);
       const col = t?.color ?? 'var(--text-muted)';
       return `<span class="gene-mini-tag" style="color:${col};border-color:${col}44;background:${col}11">${t?.label ?? tid}</span>`;
     }).join('');
@@ -327,45 +375,30 @@ function buildGeneListInner() {
           <div class="gene-list-name">${g.name}</div>
           <div class="gene-type-tags">${typeTags || '<span style="color:var(--text-muted);font-size:9px">no types assigned</span>'}</div>
         </div>
-        <button class="btn btn-sm gene-list-edit" data-editgene="${g.name}">✎ EDIT</button>
+        <button class="btn btn-sm" data-editgene="${g.name}">&#x270E; EDIT</button>
       </div>
     `;
   }).join('');
 }
 
-function wireGeneListEdits(modal, onChanged) {
-  modal.querySelectorAll('[data-editgene]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const name = btn.dataset.editgene;
-      closeModal('geneListModal');
-      openGeneEditor(name, () => {
-        onChanged?.();
-        openGeneList(onChanged);
-      });
-    });
-  });
-}
-
 /* ══════════════════════════════════════════════════════════════
-   GENE EDITOR MODAL
+   GENE EDITOR
    ══════════════════════════════════════════════════════════════ */
-export function openGeneEditor(geneName, onSave) {
-  const isEdit   = geneName !== null && geneName !== undefined;
+export function openGeneEditor(geneName, onChanged) {
+  const isEdit   = geneName != null;
   const existing = isEdit ? GeneRegistry.get(geneName) : null;
 
   const allTypes      = OrganismTypes.all();
   const selectedTypes = new Set(existing?.types ?? []);
 
-  /* ── Default function body ── */
-  const defaultBody = existing
+  const defaultBody = isEdit
     ? extractFnBody(existing.fn)
     : `// genome: number[]  — values in [0, 1], one per genome slot
-// params: object   — from the active problem (can be empty)
+// params: object    — from the active problem (can be empty)
 // Must return an array of the same length as genome.
 
 return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1)));`;
 
-  /* ── Type chips ── */
   const typeChips = allTypes.length
     ? allTypes.map(t => {
         const on  = selectedTypes.has(t.id);
@@ -373,14 +406,13 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
         return `<div class="gene-chip type-chip ${on ? 'gene-chip-on' : ''}"
                      data-type="${t.id}" style="${sty}">
           <span class="gene-chip-name" style="${on ? `color:${t.color}` : ''}">${t.label}</span>
-          <span class="gene-chip-check" style="color:${t.color}">✓</span>
+          <span class="gene-chip-check" style="color:${t.color}">&#x2713;</span>
         </div>`;
       }).join('')
     : '<div style="color:var(--text-muted);font-size:10px;padding:4px">No organism types defined yet.</div>';
 
   const bodyHTML = `
     <div class="modal-form">
-
       <div class="mf-row">
         <div class="mf-group mf-flex2">
           <label class="field-label">Gene Name <span style="color:var(--text-muted)">(camelCase, no spaces)</span></label>
@@ -411,23 +443,26 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
       </div>
 
       <div style="display:flex;align-items:center;gap:8px">
-        <button class="btn btn-sm" id="ge_test">▶ TEST WITH RANDOM GENOME</button>
+        <button class="btn btn-sm" id="ge_test">&#x25B6; TEST WITH RANDOM GENOME</button>
         <span style="font-size:9px;color:var(--text-muted)">Runs against 8 random values to verify output</span>
       </div>
       <div class="gene-test-result" id="ge_testOut" style="display:none"></div>
-
     </div>
   `;
 
   const footerHTML = `
-    ${isEdit ? `<button class="btn btn-warn btn-sm" id="ge_delete">⊗ DELETE GENE</button>` : ''}
-    <button class="btn" data-close="geneModal">CANCEL</button>
-    <button class="btn btn-primary" id="ge_save">${isEdit ? '✎ SAVE GENE' : '⊕ CREATE GENE'}</button>
+    ${isEdit ? `<button class="btn btn-warn btn-sm" id="ge_delete">&#x2297; DELETE GENE</button>` : ''}
+    <button class="btn" id="ge_back">&#x2190; BACK</button>
+    <button class="btn btn-primary" id="ge_save">${isEdit ? '&#x270E; SAVE GENE' : '&#x2295; CREATE GENE'}</button>
   `;
 
-  const overlay = createModal('geneModal', isEdit ? `EDIT GENE: ${geneName}` : 'NEW GENE', bodyHTML, footerHTML);
+  const overlay = createModal('geneModal',
+    isEdit ? `EDIT GENE: ${geneName}` : 'NEW GENE',
+    bodyHTML, footerHTML
+  );
+  pushModal(overlay);
 
-  /* ── Type chip toggles ── */
+  /* Type chip toggles */
   overlay.querySelector('#ge_typeGrid').addEventListener('click', (e) => {
     const chip = e.target.closest('[data-type]');
     if (!chip) return;
@@ -438,17 +473,17 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
     chip.classList.toggle('gene-chip-on', on);
     if (on && type) {
       chip.style.cssText = `background:${type.color}22;border-color:${type.color};color:${type.color}`;
-      chip.querySelector('.gene-chip-name').style.color = type.color;
+      chip.querySelector('.gene-chip-name').style.color  = type.color;
       chip.querySelector('.gene-chip-check').style.color = type.color;
     } else {
       chip.style.cssText = '';
-      chip.querySelector('.gene-chip-name').style.color = '';
+      chip.querySelector('.gene-chip-name').style.color  = '';
       chip.querySelector('.gene-chip-check').style.color = '';
     }
     overlay.querySelector('#ge_typeCount').textContent = `${selectedTypes.size} selected`;
   });
 
-  /* ── Test function ── */
+  /* Test */
   overlay.querySelector('#ge_test').addEventListener('click', () => {
     const errEl = overlay.querySelector('#ge_error');
     const outEl = overlay.querySelector('#ge_testOut');
@@ -457,9 +492,9 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
     outEl.style.display = 'none';
     try {
       // eslint-disable-next-line no-new-func
-      const fn      = new Function('genome', 'params', body);
-      const testIn  = Array.from({ length: 8 }, () => +Math.random().toFixed(4));
-      const result  = fn([...testIn], {});
+      const fn     = new Function('genome', 'params', body);
+      const testIn = Array.from({ length: 8 }, () => +Math.random().toFixed(4));
+      const result = fn([...testIn], {});
       if (!Array.isArray(result) && !(result instanceof Float32Array))
         throw new Error('Return value must be an Array (not ' + typeof result + ')');
       outEl.style.display = 'block';
@@ -468,22 +503,24 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
         <div class="test-out">OUT: [${Array.from(result).map(v => (+v).toFixed(4)).join(', ')}]</div>
       `;
     } catch (e) {
-      errEl.textContent = `✗ ${e.message}`;
+      errEl.textContent = `&#x2717; ${e.message}`;
     }
   });
 
-  /* ── Delete ── */
+  /* Back — pop editor, gene list re-appears */
+  overlay.querySelector('#ge_back').addEventListener('click', () => {
+    popModal('geneModal', () => refreshGeneList());
+  });
+
+  /* Delete */
   overlay.querySelector('#ge_delete')?.addEventListener('click', () => {
     if (!confirm(`Delete gene "${geneName}"?\nOrganism types that reference it will still list it until you edit them.`)) return;
     GeneRegistry.delete(geneName);
-    closeModal('geneModal');
-    onSave?.();
+    onChanged?.();
+    popModal('geneModal', () => refreshGeneList());
   });
 
-  /* ── Cancel ── */
-  overlay.querySelector('[data-close="geneModal"]').addEventListener('click', () => closeModal('geneModal'));
-
-  /* ── Save ── */
+  /* Save */
   overlay.querySelector('#ge_save').addEventListener('click', () => {
     const errEl = overlay.querySelector('#ge_error');
     const name  = isEdit
@@ -492,9 +529,9 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
     const body  = overlay.querySelector('#ge_fn').value;
     errEl.textContent = '';
 
-    if (!name)  { errEl.textContent = '✗ Gene name is required.'; return; }
-    if (!isEdit && GeneRegistry.get(name)) { errEl.textContent = `✗ Gene "${name}" already exists.`; return; }
-    if (selectedTypes.size === 0) { errEl.textContent = '✗ Assign this gene to at least one organism type.'; return; }
+    if (!name)                                   { errEl.textContent = '&#x2717; Gene name is required.'; return; }
+    if (!isEdit && GeneRegistry.get(name))        { errEl.textContent = `&#x2717; Gene "${name}" already exists.`; return; }
+    if (selectedTypes.size === 0)                 { errEl.textContent = '&#x2717; Assign this gene to at least one organism type.'; return; }
 
     let fn;
     try {
@@ -504,14 +541,14 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
       if (!Array.isArray(testResult) && !(testResult instanceof Float32Array))
         throw new Error('Return value must be an Array');
     } catch (e) {
-      errEl.textContent = `✗ Function error: ${e.message}`;
+      errEl.textContent = `&#x2717; Function error: ${e.message}`;
       return;
     }
 
     const typeList = [...selectedTypes];
     GeneRegistry.register(name, typeList, fn);
 
-    /* If this is a new gene, auto-add it to the gene pool of its selected types */
+    /* Auto-add to gene pool of selected types (new genes only) */
     if (!isEdit) {
       for (const tid of typeList) {
         const t = OrganismTypes.get(tid);
@@ -519,14 +556,13 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
       }
     }
 
-    closeModal('geneModal');
-    onSave?.();
+    onChanged?.();
+    popModal('geneModal', () => refreshGeneList());
   });
 }
 
 /* ── HELPERS ── */
 function showModalError(overlay, msg) {
-  // Show a quick shake + brief error banner at footer
   const footer = overlay.querySelector('.modal-footer');
   let err = footer.querySelector('.modal-inline-error');
   if (!err) {
@@ -535,23 +571,51 @@ function showModalError(overlay, msg) {
     err.style.cssText = 'font-size:11px;color:var(--red);font-family:var(--font-mono);margin-right:auto;order:-1';
     footer.prepend(err);
   }
-  err.textContent = `✗ ${msg}`;
+  err.textContent = `\u2717 ${msg}`;
   overlay.querySelector('.modal-box').classList.add('modal-shake');
   overlay.querySelector('.modal-box').addEventListener('animationend', () =>
-    overlay.querySelector('.modal-box')?.classList.remove('modal-shake'), { once: true });
+    overlay.querySelector('.modal-box')?.classList.remove('modal-shake'), { once: true }
+  );
 }
 
+/*
+ * extractFnBody
+ * ─────────────
+ * new Function('genome','params', body).toString() always produces:
+ *   "function anonymous(genome,params\n) {\n<body>\n}"
+ *
+ * We extract by finding the first '{' and the last '}' in the string,
+ * then taking everything in between and stripping the surrounding newlines.
+ * This is more robust than a regex because it handles any body content,
+ * including nested braces, without worrying about greedy matching.
+ *
+ * For arrow functions stored without new Function() (e.g. defined inline
+ * in problems.js), there may be no braces at all (concise arrow). In that
+ * case we return the source as-is with a comment so the user can see it.
+ */
 function extractFnBody(fn) {
   try {
-    const src   = fn.toString();
-    const match = src.match(/\{([\s\S]*)\}/);
-    if (match) return match[1].replace(/^\n/, '').replace(/\n\s*$/, '');
-    return src;
+    const src        = fn.toString();
+    const firstBrace = src.indexOf('{');
+    const lastBrace  = src.lastIndexOf('}');
+
+    if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+      // Concise arrow function — no braces, the whole expression is the body.
+      // Wrap it so the user can see the intent and edit it properly.
+      return `// Converted from concise arrow — edit as needed:\nreturn ${src.slice(src.indexOf('=>') + 2).trim()};`;
+    }
+
+    const inner = src.slice(firstBrace + 1, lastBrace);
+    // Strip the single leading newline and trailing newline that new Function adds.
+    return inner.replace(/^\n/, '').replace(/\n$/, '');
   } catch {
-    return '// Could not decompile — write your own body\nreturn genome;';
+    return '// Could not decompile — write your own body here.\nreturn genome;';
   }
 }
 
 function escapeHTML(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
