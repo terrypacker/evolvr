@@ -5,6 +5,7 @@
 import { Population, OrganismTypes, GeneRegistry } from './engine.js';
 import { Problems } from './problems.js';
 import { openOrganismList, openGeneList } from './modals.js';
+import { openHelp } from './help.js';
 
 /* ── ORGANISM TYPE DEFINITIONS ──────────────────────────────── */
 OrganismTypes.register({
@@ -423,6 +424,9 @@ function wireEvents() {
       // Only apply on reset
     });
   });
+
+  // Help button
+  document.getElementById('btnHelp')?.addEventListener('click', openHelp);
 
   // Modal buttons in CFG panel
   document.getElementById('btnEditTypes')?.addEventListener('click', () => {

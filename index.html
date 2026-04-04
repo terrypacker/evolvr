@@ -8,8 +8,9 @@
   <!-- CSS load order: base → theme → page -->
   <link rel="stylesheet" href="https://terrypacker.com/assets/css/base.css">
   <link rel="stylesheet" href="https://terrypacker.com/assets/css/theme-amber.css">
-  <link rel="stylesheet" href="assets/css/evo-sim.css">
-  <link rel="stylesheet" href="assets/css/modals.css">
+  <link rel="stylesheet" href="./assets/css/evo-sim.css">
+  <link rel="stylesheet" href="./assets/css/modals.css">
+  <link rel="stylesheet" href="./assets/css/help.css">
 </head>
 <body>
 <div id="app">
@@ -46,6 +47,7 @@
 
     <div style="display:flex;align-items:center;gap:10px">
       <span class="panel-tag">v1.0</span>
+      <button class="btn btn-sm" id="btnHelp" title="Open help documentation">? HELP</button>
     </div>
   </header>
 
@@ -216,13 +218,12 @@
     <span>Genetic Algorithm Playground</span>
     <span>·</span>
     <span>Edit <code>problems.js</code> to add new problems &amp; genes</span>
-    <span style="margin-left:auto">base.css + theme-amber.css + evo-sim.css</span>
   </div>
 
 </div>
 
 <!-- ES module entry point -->
-<script type="module" src="assets/js/app.js"></script>
+<script type="module" src="./assets/js/app.js"></script>
 
 <!-- Post-init: update gene badge count -->
 <script type="module">

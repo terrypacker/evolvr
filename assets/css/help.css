@@ -1,0 +1,385 @@
+/* =============================================================
+   HELP.CSS  —  Help Modal Styles
+   Load after modals.css
+   ============================================================= */
+
+/* ── HELP MODAL OVERLAY ── */
+.help-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+.help-modal.modal-visible { opacity: 1; }
+
+/* ── HELP BOX ── */
+.help-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hi);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 900px;
+  height: 86vh;
+  max-height: 780px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 32px 100px rgba(0,0,0,0.9), 0 0 0 1px var(--amber-dim) inset;
+  transform: translateY(12px);
+  transition: transform 0.2s ease;
+  overflow: hidden;
+}
+.help-modal.modal-visible .help-box { transform: translateY(0); }
+
+/* ── HELP HEADER ── */
+.help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--bg-panel2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* ── HELP BODY: sidebar + content ── */
+.help-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR NAV ── */
+.help-sidebar {
+  width: 210px;
+  flex-shrink: 0;
+  background: var(--bg-panel2);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 8px 0;
+}
+.help-sidebar::-webkit-scrollbar { width: 3px; }
+
+.help-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.12s;
+  border-left: 2px solid transparent;
+  user-select: none;
+}
+.help-nav-item:hover { background: rgba(255,255,255,0.03); }
+.help-nav-item.active {
+  background: var(--amber-glow);
+  border-left-color: var(--amber);
+}
+.help-nav-icon {
+  font-size: 14px;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.help-nav-label {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  line-height: 1.3;
+}
+.help-nav-item.active .help-nav-label { color: var(--amber); }
+
+/* ── CONTENT AREA ── */
+.help-content {
+  flex: 1;
+  overflow-y: auto;
+  min-width: 0;
+}
+.help-content::-webkit-scrollbar { width: 5px; }
+
+/* ── PANES ── */
+.help-pane { display: none; padding: 24px 28px 40px; }
+.help-pane.active { display: block; }
+
+.help-pane-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 12px;
+  margin-bottom: 20px;
+}
+.help-pane-icon { font-size: 22px; }
+.help-pane-title {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  color: var(--text-primary);
+}
+
+.help-pane-body { color: var(--text-dim); line-height: 1.7; font-size: 13px; }
+.help-pane-body p { margin-bottom: 12px; }
+.help-pane-body p:last-child { margin-bottom: 0; }
+.help-pane-body strong { color: var(--text-primary); font-weight: 600; }
+.help-pane-body em { color: var(--amber); font-style: normal; font-weight: 500; }
+.help-pane-body code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cyan);
+  background: rgba(0, 212, 232, 0.08);
+  border: 1px solid rgba(0, 212, 232, 0.15);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+
+/* ── SUBHEADINGS ── */
+.help-subhead {
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin: 20px 0 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── CONCEPT GRID (intro) ── */
+.help-concept-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 16px 0;
+}
+.help-concept {
+  background: var(--bg-panel2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 14px;
+}
+.help-concept-icon { font-size: 20px; margin-bottom: 6px; }
+.help-concept-label {
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+}
+.help-concept-desc { font-size: 11.5px; color: var(--text-muted); line-height: 1.6; }
+
+/* ── EVOLUTION FLOW DIAGRAM ── */
+.help-flow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 18px 0;
+  background: var(--bg-panel2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 16px;
+  overflow-x: auto;
+}
+.help-flow-step {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  text-align: center;
+  background: var(--bg-input);
+  border: 1px solid var(--border-hi);
+  border-radius: 3px;
+  padding: 8px 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.help-flow-step span {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+  text-transform: none;
+}
+.help-flow-arrow {
+  color: var(--amber-dim);
+  font-size: 16px;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+/* ── ITEM LIST (key-value style) ── */
+.help-item-list { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
+.help-item {
+  background: var(--bg-panel2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 14px;
+}
+.help-item-head { margin-bottom: 6px; }
+.help-item p { margin: 0; font-size: 12px; line-height: 1.65; }
+
+/* ── HELP TAG (inline label) ── */
+.help-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  background: var(--bg-input);
+  border: 1px solid var(--border-hi);
+  padding: 2px 8px;
+  border-radius: 2px;
+  letter-spacing: 0.06em;
+}
+
+/* ── TIP BOX ── */
+.help-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--amber-glow);
+  border: 1px solid var(--amber-dim);
+  border-radius: 4px;
+  padding: 10px 14px;
+  margin: 14px 0;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.help-tip-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.help-tip code { background: rgba(240,165,0,0.15); border-color: var(--amber-dim); color: var(--amber); }
+
+/* ── PROBLEM CARDS ── */
+.help-problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+.help-problem-card {
+  background: var(--bg-panel2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 14px;
+}
+.help-problem-name {
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--amber);
+  margin-bottom: 7px;
+}
+.help-problem-card p { font-size: 11.5px; margin-bottom: 8px; line-height: 1.6; }
+.help-problem-tip {
+  font-size: 10.5px;
+  color: var(--cyan);
+  border-top: 1px solid var(--border);
+  padding-top: 7px;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* ── FIELD GRID ── */
+.help-field-grid { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; }
+.help-field {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 10px;
+  align-items: baseline;
+  background: var(--bg-panel2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+.help-field-name {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--amber);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.help-field-desc { font-size: 11.5px; color: var(--text-muted); line-height: 1.6; }
+.help-field-desc code { font-size: 10px; }
+
+/* ── CODE BLOCKS ── */
+.help-code-block {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.7;
+  background: #060910;
+  border: 1px solid var(--border-hi);
+  border-radius: 4px;
+  padding: 10px 14px;
+  margin: 8px 0;
+  color: #abb2c0;
+  overflow-x: auto;
+  white-space: pre;
+}
+.hljs-comment { color: #4a5568; }
+.hljs-kw      { color: var(--purple); }
+.hljs-fn      { color: var(--cyan); }
+.hljs-num     { color: var(--green); }
+.hljs-op      { color: var(--amber); }
+.hljs-str     { color: #e0a070; }
+
+/* ── GENE TABLE ── */
+.help-gene-table {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 12px 0;
+  font-size: 11.5px;
+}
+.help-gene-row {
+  display: grid;
+  grid-template-columns: 148px 140px 1fr;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  padding: 6px 10px;
+  align-items: baseline;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.help-gene-row:last-child { border-bottom: none; }
+.help-gene-row.header {
+  background: var(--bg-panel2);
+  font-family: var(--font-head);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.help-gene-row .mono {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--cyan);
+}
+
+/* ── TIPS GRID ── */
+.help-tip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+.help-tip-card {
+  background: var(--bg-panel2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 14px;
+}
+.help-tip-card-title {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+  margin-bottom: 7px;
+}
+.help-tip-card p { font-size: 11.5px; margin: 0; line-height: 1.6; }
+.help-tip-card code { font-size: 10px; }
