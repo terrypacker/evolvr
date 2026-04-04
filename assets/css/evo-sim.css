@@ -284,6 +284,10 @@ html, body { height: 100%; overflow: hidden; font-size: 13px; }
   border-radius: 2px;
   font-size: 10px;
 }
+.gene-row:hover {
+  background: var(--amber-dim);
+  cursor: pointer; /* Change mouse cursor */
+}
 .gene-row-top {
   display: flex;
   justify-content: space-between;
@@ -297,7 +301,14 @@ html, body { height: 100%; overflow: hidden; font-size: 13px; }
   font-style: italic;
 }
 .gene-name  { font-family: var(--font-mono); color: var(--text-primary); }
-.gene-types { font-size: 9px; color: var(--text-muted); font-family: var(--font-head); letter-spacing: 0.06em; }
+.gene-types {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-family: var(--font-head);
+  letter-spacing: 0.06em;
+  overflow-x: auto;
+  padding-left: 5px;
+}
 
 /* ── CONFIG PANEL ── */
 .config-row {

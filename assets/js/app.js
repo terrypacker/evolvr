@@ -4,7 +4,7 @@
 
 import { Population, OrganismTypes, GeneRegistry } from './engine.js';
 import { Problems } from './problems.js';
-import { openOrganismList, openGeneList } from './modals.js';
+import {openOrganismList, openGeneList, openGeneEditor} from './modals.js';
 import { openHelp } from './help.js';
 
 /* ── ORGANISM TYPE DEFINITIONS ──────────────────────────────── */
@@ -185,6 +185,10 @@ function buildGenePanel() {
   container.innerHTML = '';
   for (const gene of GeneRegistry.all()) {
     const row = document.createElement('div');
+    //row.classList.add('btn');
+    row.addEventListener('click', (evt) => {
+      openGeneEditor(gene.name, buildGenePanel);
+    });
     let typesHTML = '';
     for (const type of gene.types) {
       const orgType = OrganismTypes.get(type);
