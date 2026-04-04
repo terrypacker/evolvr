@@ -100,14 +100,19 @@ const PeakFinder = {
       }
     }
 
-    // Draw goal contour
-    ctx.strokeStyle = 'rgba(240,165,0,0.4)';
-    ctx.lineWidth   = 1;
-    ctx.setLineDash([2, 4]);
-    // simple horizontal target line overlay
-    ctx.beginPath();
-    ctx.strokeStyle = `rgba(240,165,0,${goal ? 0.7 : 0})`;
-    ctx.setLineDash([4, 4]);
+    // Draw goal contour — horizontal line at the goal fitness height
+    // (fitness maps linearly to Y in the heatmap; highest peak ~top)
+    if (goal) {
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(240,165,0,0.5)';
+      ctx.lineWidth   = 1;
+      ctx.setLineDash([4, 4]);
+      const goalY = H * (1 - goal);
+      ctx.moveTo(0, goalY);
+      ctx.lineTo(W, goalY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
 
     // Draw organisms
     if (population?.organisms) {
@@ -295,47 +300,94 @@ const Knapsack = {
     const n        = items.length;
     const barW     = (W - 30) / n;
     const pad      = 15;
+    const innerH   = H - pad * 2 - 10;
 
-    // Draw item bars (weight and value)
-    for (let i = 0; i < n; i++) {
-      const x  = pad + i * barW;
-      const wh = items[i].weight * (H - pad * 2 - 10);
-      const vh = items[i].value  * (H - pad * 2 - 10);
-
-      ctx.fillStyle = '#1a2030';
-      ctx.fillRect(x + 2, pad, barW - 4, H - pad * 2 - 10);
-
-      ctx.fillStyle = '#2e3a5090';
-      ctx.fillRect(x + 2, H - pad - 10 - wh, barW - 4, wh);
-
-      ctx.fillStyle = '#f0a50060';
-      ctx.fillRect(x + 2 + (barW - 6) / 2, H - pad - 10 - vh, (barW - 6) / 2, vh);
-    }
-
-    // Overlay selections from best organism
+    // Determine which items the best organism has selected
+    let selected = new Array(n).fill(false);
     if (population?.bestOrganism) {
       const org = population.bestOrganism;
       const ex  = org.express({});
       for (let i = 0; i < n; i++) {
-        if ((ex[i] ?? org.genome[i]) > 0.5) {
-          const x = pad + i * barW;
-          ctx.strokeStyle = '#00d4e8';
-          ctx.lineWidth   = 2;
-          ctx.strokeRect(x + 2, pad, barW - 4, H - pad * 2 - 10);
-        }
+        selected[i] = (ex[i] ?? org.genome[i] ?? 0) > 0.5;
       }
     }
 
+    // Draw item bars — static item properties (grey=weight, amber=value)
+    // plus a highlighted selected state so bars react to selection changes
+    for (let i = 0; i < n; i++) {
+      const x   = pad + i * barW;
+      const wh  = items[i].weight * innerH;
+      const vh  = items[i].value  * innerH;
+      const sel = selected[i];
+
+      // Background slot
+      ctx.fillStyle = sel ? '#1e2a40' : '#141820';
+      ctx.fillRect(x + 2, pad, barW - 4, innerH);
+
+      // Weight bar (left half of slot) — brighter when selected
+      ctx.fillStyle = sel ? '#4a6090cc' : '#2e3a5060';
+      ctx.fillRect(x + 2, pad + innerH - wh, (barW - 6) / 2, wh);
+
+      // Value bar (right half of slot) — brighter when selected
+      ctx.fillStyle = sel ? '#f0a500bb' : '#f0a50038';
+      ctx.fillRect(x + 2 + (barW - 6) / 2, pad + innerH - vh, (barW - 6) / 2, vh);
+
+      // Selected outline
+      if (sel) {
+        ctx.strokeStyle = '#00d4e8';
+        ctx.lineWidth   = 2;
+        ctx.setLineDash([]);
+        ctx.strokeRect(x + 2, pad, barW - 4, innerH);
+      }
+    }
+
+    // Running total weight bar across the bottom showing how full the knapsack is
+    if (population?.bestOrganism) {
+      const org = population.bestOrganism;
+      const ex  = org.express({});
+      let totalW = 0, totalV = 0;
+      const maxV = items.reduce((s, it) => s + it.value, 0);
+      for (let i = 0; i < n; i++) {
+        if ((ex[i] ?? org.genome[i] ?? 0) > 0.5) {
+          totalW += items[i].weight;
+          totalV += items[i].value;
+        }
+      }
+      const overCapacity = totalW > capacity;
+
+      // Weight fill bar
+      const fillW = Math.min(totalW / capacity, 1.5) * (W - pad * 2);
+      ctx.fillStyle = overCapacity ? '#ff445530' : '#2e3a5060';
+      ctx.fillRect(pad, H - pad - 8, W - pad * 2, 6);
+      ctx.fillStyle = overCapacity ? '#ff4455cc' : '#00d4e8cc';
+      ctx.fillRect(pad, H - pad - 8, fillW, 6);
+
+      // Labels
+      ctx.fillStyle = overCapacity ? '#ff4455' : '#6a7590';
+      ctx.font = '9px monospace';
+      const wLabel = 'W:' + totalW.toFixed(2) + '/' + capacity.toFixed(2);
+      const vLabel = '  V:' + totalV.toFixed(2) + '/' + maxV.toFixed(2);
+      const label  = overCapacity
+        ? 'OVER CAPACITY  ' + wLabel
+        : wLabel + vLabel;
+      ctx.fillText(label, pad, H - pad - 12);
+    }
+
     // Capacity line
-    const capY = H - pad - 10 - capacity * (H - pad * 2 - 10);
+    const capY = pad + innerH - capacity * innerH;
     ctx.beginPath();
-    ctx.strokeStyle = '#ff445580';
+    ctx.strokeStyle = '#ff445570';
     ctx.lineWidth   = 1;
     ctx.setLineDash([4, 4]);
     ctx.moveTo(pad, capY);
     ctx.lineTo(W - pad, capY);
     ctx.stroke();
     ctx.setLineDash([]);
+
+    // Legend
+    ctx.fillStyle = '#3a4258';
+    ctx.font = '9px monospace';
+    ctx.fillText('▌ WEIGHT  ▌ VALUE   ── CAPACITY', pad, pad - 4);
   }
 };
 

@@ -96,9 +96,8 @@ function init() {
   buildTypeWeightControls();
   buildGenePanel();
   initCharts();
-  resetSim();
+  resetSim();     // calls renderOnce() internally
   wireEvents();
-  renderLoop();
 }
 
 /* Called after organism types or genes change in the editor */
@@ -199,7 +198,7 @@ function resetSim() {
   state.generation = 0;
 
   updateDashboard();
-  renderViz();
+  renderOnce();
 }
 
 function startSim() {
@@ -211,6 +210,7 @@ function startSim() {
   dom.btnStart().textContent  = '⏸ PAUSE';
   dom.btnStart().classList.add('btn-warn');
   scheduleTick();
+  requestAnimationFrame(renderLoop); // restart RAF chain
 }
 
 function stopSim() {
@@ -232,7 +232,7 @@ function stepOnce() {
   if (!state.population) return;
   state.population.evolve();
   updateDashboard();
-  renderViz();
+  renderOnce();
 }
 
 function scheduleTick() {
@@ -385,9 +385,15 @@ function renderViz() {
 /* ── RENDER LOOP (60fps UI, decoupled from sim) ─────────────── */
 function renderLoop() {
   renderViz();
-  if(state.running === true) {
+  if (state.running === true) {
     requestAnimationFrame(renderLoop);
   }
+}
+
+/* Kick off a single render frame — used after STEP / RESET / any
+   state change that happens while the sim is not running.         */
+function renderOnce() {
+  requestAnimationFrame(renderViz);
 }
 
 /* ── EVENT WIRING ───────────────────────────────────────────── */
@@ -415,6 +421,7 @@ function wireEvents() {
     const val = +e.target.value;
     state.goal = state.problem.goals.find(g => g.value === val) ?? state.problem.goals[0];
     updateDashboard();
+    if (!state.running) renderOnce();
   });
 
   // Config sliders live
