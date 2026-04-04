@@ -277,15 +277,24 @@ html, body { height: 100%; overflow: hidden; font-size: 13px; }
 /* ── GENE PANEL ── */
 .gene-list { padding: 6px 10px; }
 .gene-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 3px 6px;
+  padding: 5px 6px;
   margin-bottom: 2px;
   background: var(--bg-panel2);
   border: 1px solid var(--border);
   border-radius: 2px;
   font-size: 10px;
+}
+.gene-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.gene-row-desc {
+  font-size: 9px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: 3px;
+  font-style: italic;
 }
 .gene-name  { font-family: var(--font-mono); color: var(--text-primary); }
 .gene-types { font-size: 9px; color: var(--text-muted); font-family: var(--font-head); letter-spacing: 0.06em; }

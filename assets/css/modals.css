@@ -358,3 +358,13 @@
 .modal-overlay {
   background: rgba(0, 0, 0, 0.55);
 }
+
+/* ── GENE LIST DESCRIPTION ── */
+.gene-list-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-top: 4px;
+  font-style: italic;
+  padding-right: 8px;
+}

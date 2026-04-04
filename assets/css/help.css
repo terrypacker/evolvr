@@ -383,3 +383,18 @@
 }
 .help-tip-card p { font-size: 11.5px; margin: 0; line-height: 1.6; }
 .help-tip-card code { font-size: 10px; }
+
+/* ── MATH DISPLAY BLOCKS ── */
+.help-math {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.9;
+  background: #060910;
+  border: 1px solid var(--border-hi);
+  border-left: 3px solid var(--cyan-dim);
+  border-radius: 3px;
+  padding: 10px 14px;
+  margin: 10px 0;
+  color: var(--cyan);
+  white-space: pre;
+}

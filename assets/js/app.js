@@ -185,11 +185,24 @@ function buildGenePanel() {
   container.innerHTML = '';
   for (const gene of GeneRegistry.all()) {
     const row = document.createElement('div');
+    let typesHTML = '';
+    for (const type of gene.types) {
+      const orgType = OrganismTypes.get(type);
+      typesHTML += `<div class="gene-mini-tag"
+           style="background:${orgType.color}22;border-color:${orgType.color}66;color:${orgType.color};">
+        ${orgType.label}
+      </div>
+      `;
+    }
     row.className = 'gene-row';
     row.innerHTML = `
-      <span class="gene-name">${gene.name}</span>
-      <span class="gene-types">${gene.types.join(', ')}</span>
-    `;
+      <div class="gene-row-top">
+        <span class="gene-name">${gene.name}</span>
+        <span class="gene-types" style="display:flex">
+          ${typesHTML}
+        </span>
+      </div>
+     `;
     container.appendChild(row);
   }
 }

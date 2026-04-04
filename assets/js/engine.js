@@ -21,8 +21,8 @@ export const GeneRegistry = (() => {
   const _genes = new Map();
 
   const api = {
-    register(name, types, fn) {
-      _genes.set(name, { name, types, fn });
+    register(name, types, fn, description = '') {
+      _genes.set(name, { name, types, fn, description });
     },
     delete(name) { _genes.delete(name); },
     get(name) { return _genes.get(name); },

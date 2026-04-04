@@ -148,6 +148,57 @@ const SECTIONS = [
         <span class="help-tip-icon">🔧</span>
         <span>To add your own problem, open <code>problems.js</code> and push a new object into the <code>Problems</code> array. It needs an <code>id</code>, <code>label</code>, <code>evaluate(genome, expressed, organism)</code> function returning 0–1, and a <code>visualize(canvas, population, goal)</code> function. The UI picks it up automatically.</span>
       </div>
+
+      <h4 class="help-subhead">How Each Problem Evaluates Fitness</h4>
+
+      <div class="help-item-list">
+
+        <div class="help-item">
+          <div class="help-item-head"><span class="help-tag" style="color:var(--amber);border-color:var(--amber-dim)">Peak Finder — Gaussian Mixture</span></div>
+          <p>The landscape is a sum of 7 Gaussian "hills", each centred at a fixed point (xₚ, yₚ) in [0,1]². The height function is:</p>
+          <div class="help-math">
+            h(x, y) = min(1, Σₚ hₚ · exp( −(x−xₚ)² + (y−yₚ)² / 2σₚ² ))
+          </div>
+          <p>Fitness is simply <em>h(expressed[0], expressed[1])</em> — the landscape height at the organism's expressed (x, y) coordinates. Because fitness depends only on the <strong>first two expressed values</strong>, genes that transform positions 2 and beyond have no effect at all. The optimal gene strategy is one that helps the organism zero-in on a high-value (x, y) point without disrupting those two coordinates.</p>
+          <p><strong>Good genes for this problem:</strong> <code>randomWalk</code> and <code>gaussianNoise</code> create small spatial movements around the current position. <code>boundaryPush</code> prevents corners of the search space from being over-represented. Genes that preserve the magnitude of positions (rather than remapping them) work best.</p>
+          <p><strong>Problematic genes:</strong> <code>mirrorFold</code> forces expressed[1] = 1 − expressed[0], which constrains organisms to the anti-diagonal of the search space, making most peaks unreachable. <code>rankSort</code> and <code>normalize</code> destroy positional information by replacing values with their relative rank.</p>
+        </div>
+
+        <div class="help-item">
+          <div class="help-item-head"><span class="help-tag" style="color:var(--cyan);border-color:var(--cyan-dim)">Function Approximation — Polynomial MSE</span></div>
+          <p>The expressed genome is interpreted as the coefficients of a polynomial p(x) = Σᵢ aᵢ · xⁱ, evaluated over 20 equally-spaced sample points x ∈ {0, 1/19, 2/19, …, 1}. The target function is:</p>
+          <div class="help-math">
+            f(x) = 0.5 · sin(2πx) + 0.5
+          </div>
+          <p>The mean squared error (MSE) is computed as MSE = (1/20) · Σᵢ (p(xᵢ) − f(xᵢ))². Fitness is then <em>max(0, 1 − 20 · MSE)</em>, meaning perfect fit scores 1.0 and an average squared deviation of 0.05 scores 0. The coefficient aᵢ at genome position i is multiplied by xⁱ — so later genome positions (high-degree terms) control fine wiggles in the curve, while early positions (low-degree terms, especially a₀) set the baseline level.</p>
+          <p><strong>Good genes for this problem:</strong> Genes that preserve the continuous, real-valued nature of coefficients work well. <code>gradientNudge</code> and <code>elitePull</code> gently converge coefficient values, reducing overshoot. <code>sinTransform</code> compresses coefficients toward 0.5, which suppresses higher-degree oscillation — useful early in evolution. The polynomial is clipped to [0,1], so extreme coefficient values are automatically penalised.</p>
+          <p><strong>Problematic genes:</strong> <code>rankSort</code> replaces coefficient values with their ordinal rank, which destroys the numeric meaning of each coefficient entirely. <code>bitFlip</code> introduces large random coefficient changes that tend to produce wildly oscillating polynomials far from the smooth target.</p>
+        </div>
+
+        <div class="help-item">
+          <div class="help-item-head"><span class="help-tag" style="color:var(--green);border-color:var(--green-dim)">Binary Knapsack — Threshold Decoding</span></div>
+          <p>There are 12 items, each with a fixed weight wᵢ ∈ [0.05, 0.30] and value vᵢ ∈ [0.02, 0.32] (generated once at startup). An item is <strong>selected</strong> if expressed[i] > 0.5; otherwise it is left out. The evaluation computes:</p>
+          <div class="help-math">
+            W = Σᵢ wᵢ · 𝟙[expressed[i] > 0.5]
+            V = Σᵢ vᵢ · 𝟙[expressed[i] > 0.5]
+          </div>
+          <p>If total weight W exceeds capacity C = 0.5, fitness is <em>max(0, 1 − 2·(W − C))</em> — a steep linear penalty. If W ≤ C, fitness is <em>V / V_max</em> where V_max is the sum of all item values. The fitness landscape is inherently discontinuous: a tiny shift in one expressed value can flip a binary decision and cause a large jump in fitness. There are 2¹² = 4096 possible subsets.</p>
+          <p><strong>Good genes for this problem:</strong> Genes that push values decisively toward 0 or 1 are valuable because they make binary decisions cleaner. <code>boundaryPush</code> works against this (it pushes values away from extremes), but <code>bitFlip</code> is useful — it randomly commits some positions to 0 or 1. Conversely, <code>normalize</code> scales values so the largest is always 1.0, which can flip a non-selected item into selected without touching its genome position.</p>
+          <p><strong>Problematic genes:</strong> <code>gradientNudge</code> and <code>sinTransform</code> pull values toward 0.5, which is the decision threshold — this creates ambiguous near-0.5 values that the stochastic evaluation can flip unpredictably. <code>mirrorFold</code> forces half the items to always be the complement of the other half, eliminating half the solution space.</p>
+        </div>
+
+        <div class="help-item">
+          <div class="help-item-head"><span class="help-tag" style="color:var(--purple);border-color:#604090">Traveling Salesman — Rank Decoding</span></div>
+          <p>There are 10 cities at fixed positions (x, y) ∈ [0,1]². The expressed genome is decoded into a tour by <strong>ranking</strong>: the city at index i is visited at position rank(expressed[i]) in the tour. Formally, if expressed values are sorted ascending, city i is visited at step k where expressed[i] is the k-th smallest value. The tour length is:</p>
+          <div class="help-math">
+            D = Σₖ √((x_{order[k]} − x_{order[k+1]})² + (y_{order[k]} − y_{order[k+1]})²)
+          </div>
+          <p>where the sum wraps around (the tour returns to the start). Fitness is <em>max(0, 1 − D/5)</em>, so a tour of length 5 or more scores 0, and a perfect tour of length 0 would score 1. The critical mathematical property is that <strong>only the ordinal ranking of expressed values matters</strong>, not their absolute magnitudes — swapping values 0.3 and 0.31 produces the same tour as values 0.001 and 0.999, as long as their relative order is the same.</p>
+          <p><strong>Good genes for this problem:</strong> <code>rankSort</code> is uniquely powerful here because it explicitly converts expressed values into their fractional rank positions, making the genome encoding lossless and maximally informative for the decoder. <code>normalize</code> is similarly good — it stretches the range without changing order. Genes that preserve relative ordering are ideal.</p>
+          <p><strong>Problematic genes:</strong> <code>mirrorFold</code> is highly destructive — it sets expressed[i + half] = 1 − expressed[i], which directly inverts the relative ordering of the second half of the tour. <code>gradientNudge</code> and <code>elitePull</code> push all values toward the centre, reducing spread and making ordinal differences between values very small — neighbouring values become nearly equal and the decoded tour becomes sensitive to floating-point noise.</p>
+        </div>
+
+      </div>
     `
   },
 

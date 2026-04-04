@@ -374,6 +374,7 @@ function buildGeneListInner() {
         <div class="gene-list-info">
           <div class="gene-list-name">${g.name}</div>
           <div class="gene-type-tags">${typeTags || '<span style="color:var(--text-muted);font-size:9px">no types assigned</span>'}</div>
+          ${g.description ? `<div class="gene-list-desc">${g.description}</div>` : ''}
         </div>
         <button class="btn btn-sm" data-editgene="${g.name}">&#x270E; EDIT</button>
       </div>
@@ -420,6 +421,12 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
                  value="${existing?.name ?? ''}"
                  ${isEdit ? 'readonly style="opacity:0.5;cursor:not-allowed"' : ''}>
         </div>
+      </div>
+
+      <div class="mf-group">
+        <label class="field-label">Description <span style="color:var(--text-muted);font-weight:400">(shown in gene list &amp; help)</span></label>
+        <input class="field-input" id="ge_desc" placeholder="What this gene does mathematically and when to use it"
+               value="${escapeHTML(existing?.description ?? '')}">
       </div>
 
       <div class="mf-group">
@@ -526,6 +533,7 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
     const name  = isEdit
       ? geneName
       : overlay.querySelector('#ge_name').value.trim().replace(/\s+/g, '').replace(/[^a-zA-Z0-9_]/g, '');
+    const desc  = overlay.querySelector('#ge_desc').value.trim();
     const body  = overlay.querySelector('#ge_fn').value;
     errEl.textContent = '';
 
@@ -546,7 +554,7 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
     }
 
     const typeList = [...selectedTypes];
-    GeneRegistry.register(name, typeList, fn);
+    GeneRegistry.register(name, typeList, fn, desc);
 
     /* Auto-add to gene pool of selected types (new genes only) */
     if (!isEdit) {
