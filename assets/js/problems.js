@@ -30,14 +30,8 @@ function clearCanvas(canvas, ctx) {
 }
 
 function typeColor(typeId) {
-  const colors = {
-    explorer:   '#f0a500',
-    climber:    '#00d4e8',
-    optimizer:  '#39e080',
-    mutant:     '#a080ff',
-    default:    '#6a7590'
-  };
-  return colors[typeId] ?? colors.default;
+  // Use the live registry so custom types get their configured colour.
+  return OrganismTypes.get(typeId)?.color ?? '#6a7590';
 }
 
 /* ── PROBLEM 1: PEAK FINDER ──────────────────────────────────── */
