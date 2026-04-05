@@ -184,10 +184,12 @@ export class Organism {
 export class Population {
   constructor(config = {}) {
     this.maxSize        = config.maxSize        ?? 30;
-    this.eliteCount     = config.eliteCount     ?? 3;
+    this.eliteCount     = config.eliteCount     ?? this.maxSize * 0.1;
     this.mutationRate   = config.mutationRate   ?? 0.1;
     this.mutationScale  = config.mutationScale  ?? 0.2;
     this.typeWeights    = config.typeWeights    ?? {};  // {typeId: weight 0-1}
+    this.deathRate      = config.deathRate      ?? 0.1;
+    this.breedingChanceRate = config.breedingChanceRate ?? 0.5;
 
     this.organisms      = [];
     this.generation     = 0;
@@ -248,6 +250,9 @@ export class Population {
     // Sort by fitness descending
     this.organisms.sort((a, b) => b.fitness - a.fitness);
 
+    //Trim population to max size, kill off the least fit
+    this.organisms = this.organisms.slice(0, this.maxSize - (this.maxSize * this.deathRate));
+
     const best = this.organisms[0];
     const avg  = this.organisms.reduce((s, o) => s + o.fitness, 0) / this.organisms.length;
 
@@ -262,11 +267,16 @@ export class Population {
 
     // Elite survivors carry over
     const elites  = this.organisms.slice(0, this.eliteCount);
-    const parents = this.organisms.slice(0, Math.ceil(this.organisms.length * 0.5));
 
-    const nextGen = [...elites];
+    //Select parents to carry over, remaining population dies and gets replaced with children
+    const parents = this.organisms.slice(0, Math.ceil(this.organisms.length * this.breedingChanceRate));
 
-    while (nextGen.length < this.maxSize) {
+    //Retain the elites and parents
+    const nextGen = [...elites, ...parents.slice(this.eliteCount, parents.length)];
+
+    //Provide a chance for mating
+    const mateChances = this.maxSize - nextGen.length;
+    for (let i=0; i<mateChances; i++) {
       const a = parents[Math.floor(Math.random() * parents.length)];
       const b = parents[Math.floor(Math.random() * parents.length)];
       if (a === b) continue;

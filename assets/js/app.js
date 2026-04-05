@@ -219,6 +219,8 @@ function resetSim() {
     mutationRate:  (+dom.mutRateInput().value  || state.mutRate)  / 100,
     mutationScale: (+dom.mutScaleInput().value || state.mutScale) / 100,
     eliteCount:    3,
+    deathRate: 0.2,
+    breedingChanceRate: 0.5
   });
   pop.setProblem(state.problem);
 
@@ -336,8 +338,13 @@ function updateEventLog(events) {
 function updatePopList(organisms, best) {
   const el = dom.popList();
   if (!el) return;
-  const sorted = [...organisms].sort((a, b) => b.fitness - a.fitness);
-  el.innerHTML = sorted.slice(0, 20).map(org => {
+  //Top 20 max
+  const sorted = [...organisms]
+    .sort((a, b) => b.fitness - a.fitness)
+    .slice(0,20)
+    .filter(item => item !== null);
+
+  el.innerHTML = sorted.map(org => {
     const type   = OrganismTypes.get(org.type);
     const col    = type?.color ?? '#6a7590';
     const isBest = org === best;
