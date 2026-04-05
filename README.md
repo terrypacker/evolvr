@@ -454,12 +454,12 @@ The top-level controller. Responsibilities:
 
 Four exported functions:
 
-| Function | Opens |
-|----------|-------|
-| `openOrganismList(onChanged)` | Scrollable list of all types with inline stats |
-| `openOrganismEditor(typeId, onDone)` | Full type editor; `typeId = null` creates a new type |
-| `openGeneList(onChanged)` | Scrollable list of all genes with type memberships |
-| `openGeneEditor(geneName, onDone)` | Full gene editor with live test runner; `geneName = null` creates a new gene |
+| Function                                 | Opens |
+|------------------------------------------|-------|
+| `openOrganismList(onChanged)`            | Scrollable list of all types with inline stats |
+| `openOrganismTypeEditor(typeId, onDone)` | Full type editor; `typeId = null` creates a new type |
+| `openGeneList(onChanged)`                | Scrollable list of all genes with type memberships |
+| `openGeneEditor(geneName, onDone)`       | Full gene editor with live test runner; `geneName = null` creates a new gene |
 
 Both list modals use event delegation for their edit buttons, so they don't need to be re-rendered when the list changes.
 

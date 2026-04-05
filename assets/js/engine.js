@@ -81,7 +81,7 @@ export class Organism {
     this.alive    = true;
     this.children = 0;
     this.mate     = null;            // last mate id
-    this.log      = [];              // event log
+    this.log      = [];              // event log {age: n, msg: 'message'}
 
     const typeDef = OrganismTypes.get(type);
     const len = typeDef?.genomeLength ?? 8;
@@ -170,10 +170,20 @@ export class Organism {
       if (!childGenes.includes(candidate)) childGenes.push(candidate);
     }
 
+    //Assign the last mate
+    this.mate = mate;
+    this.logMessage('Mated with ' + mate.id);
+    mate.mate = this.mate;
+    mate.logMessage('Mated with ' + this.id);
+
     const childOrg   = new Organism(this.type, child);
     childOrg.genes   = childGenes.length ? childGenes : this.genes.slice();
     childOrg.type    = Math.random() < 0.8 ? this.type : mate.type;
     return childOrg;
+  }
+
+  logMessage(msg) {
+    this.log.push({age: this.age, msg: msg});
   }
 }
 
@@ -311,5 +321,16 @@ export class Population {
     for (const o of this.organisms) typeCounts[o.type] = (typeCounts[o.type] ?? 0) + 1;
 
     return { best, avg, typeCounts, generation: this.generation, size: this.organisms.length };
+  }
+
+  getOrganism(id) {
+    return this.organisms.findLast((org) => org.id === id);
+  }
+
+  deleteOrganism(id) {
+    const index = this.organisms.findIndex(org => org.id === id);
+    if (index !== -1) {
+      this.organisms.splice(index, 1);
+    }
   }
 }

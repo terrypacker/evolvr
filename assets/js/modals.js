@@ -2,8 +2,8 @@
    MODALS.JS  —  Organism Type Editor & Gene Editor Modals
    ============================================================= */
 
-import { OrganismTypes, GeneRegistry } from './engine.js';
-
+import {OrganismTypes, GeneRegistry, Population} from './engine.js';
+import {state} from './app.js';
 /* ── COLOUR PALETTE ── */
 const PALETTE = [
   '#f0a500','#00d4e8','#39e080','#a080ff',
@@ -112,11 +112,11 @@ export function openOrganismList(onChanged) {
   /* Wire edit buttons via delegation */
   modal.querySelector('#otl_list').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-edittype]');
-    if (btn) openOrganismEditor(btn.dataset.edittype, onChanged);
+    if (btn) openOrganismTypeEditor(btn.dataset.edittype, onChanged);
   });
 
   modal.querySelector('#otl_new').addEventListener('click', () => {
-    openOrganismEditor(null, onChanged);
+    openOrganismTypeEditor(null, onChanged);
   });
 
   modal.querySelector('#otl_close').addEventListener('click', closeAllModals);
@@ -160,7 +160,7 @@ function buildTypeListInner() {
 /* ══════════════════════════════════════════════════════════════
    ORGANISM TYPE EDITOR
    ══════════════════════════════════════════════════════════════ */
-export function openOrganismEditor(typeId, onChanged) {
+export function openOrganismTypeEditor(typeId, onChanged) {
   const isEdit    = typeId != null;
   const existing  = isEdit ? OrganismTypes.get(typeId) : null;
 
@@ -566,6 +566,211 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
 
     onChanged?.();
     popModal('geneModal', () => refreshGeneList());
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ORGANISM EDITOR
+   ══════════════════════════════════════════════════════════════ */
+export function openOrganismEditor(organismId, evt, onChanged) {
+  const organism = state.population.getOrganism(organismId);
+  const isEdit = true; //Edit or Create
+
+  const selectedGenes = new Set(organism?.genes ?? []);
+  const genePicker = GeneRegistry.all().length
+      ? GeneRegistry.all().map(g => {
+        const on = selectedGenes.has(g.name);
+        return `<div class="gene-chip ${on ? 'gene-chip-on' : ''}" data-gene="${g.name}" title="${g.name}">
+          <span class="gene-chip-name">${g.name}</span>
+          <span class="gene-chip-check">&#x2713;</span>
+        </div>`;
+      }).join('')
+      : '<div style="color:var(--text-muted);font-size:10px;padding:4px">No genes registered yet. Create genes first.</div>';
+
+  const allTypes      = OrganismTypes.all();
+  const selectedType = { ...OrganismTypes.get(organism?.type)};
+  const typeChips = allTypes.length
+      ? allTypes.map(t => {
+        const on  = selectedType.id === t.id;
+        const sty = on ? `background:${t.color}22;border-color:${t.color};color:${t.color}` : '';
+        return `<div class="gene-chip type-chip ${on ? 'gene-chip-on' : ''}"
+                     data-type="${t.id}" style="${sty}">
+          <span class="gene-chip-name" style="${on ? `color:${t.color}` : ''}">${t.label}</span>
+          <span class="gene-chip-check" style="color:${t.color}">&#x2713;</span>
+        </div>`;
+      }).join('')
+      : '<div style="color:var(--text-muted);font-size:10px;padding:4px">No organism types defined yet.</div>';
+
+  const organismLogs = organism?.log.slice(0, 12).map(e =>
+      `<div class="log-entry"><span class="log-gen">A${e.age}</span> ${e.msg}</div>`
+  ).join('');
+  const lastMate = state.population.getOrganism(organism.mate);
+
+  const bodyHTML = `
+    <div class="modal-form">
+      <div class="mf-row">
+        <div class="mf-group mf-flex2">
+          <label class="field-label">Organism ID <span style="color:var(--text-muted)">(Unique identfier assigned during simulation)</span></label>
+          <input class="field-input mono" id="org_id"
+                 value="${organism?.id ?? ''}"
+                 readonly style="opacity:0.5;cursor:not-allowed">
+        </div>
+      </div>
+      <div class="mf-group">
+        <label class="field-label">State <span style="color:var(--text-muted)">(Alive or Deceased)</span></label>
+        <input class="field-checkbox mono" type="checkbox" id="org_alive"
+            ${organism?.alive ? 'checked' : ''} >
+      </div>
+      <div class="mf-group">
+        <label class="field-label">Age <span style="color:var(--text-muted)">(Number of generations lived)</span></label>
+        <input class="field-input mono" id="org_age"
+               value="${organism?.age ?? ''}"
+               readonly style="opacity:0.5;cursor:not-allowed">
+      </div>
+      <div class="mf-group">
+        <label class="field-label">Fitness <span style="color:var(--text-muted)">(Ability to solve problem [0-1])</span></label>
+        <input class="field-input mono" id="org_fitness"
+               value="${organism?.fitness.toFixed(4) ?? ''}"
+               'readonly style="opacity:0.5;cursor:not-allowed">
+      </div>
+      <div class="mf-group">  
+        <label class="field-label">Children <span style="color:var(--text-muted)">(Number of children generated)</span></label>
+        <input class="field-input mono" id="org_children"
+               value="${organism?.children ?? ''}"
+               'readonly style="opacity:0.5;cursor:not-allowed">
+      </div>
+      <div class="mf-group">
+        <label class="field-label">Mate <span style="color:var(--text-muted)">(Most recent organism mated with)</span></label>
+        <div class="field-input mono"
+          readonly style="opacity:0.5;cursor:not-allowed">
+          ${organism?.mate?.id ?? 'None'}</div>
+      </div>
+      <div class="mf-group">
+        <label class="field-label">Type <span style="color:var(--text-muted)">(Organism type at birth)</span></label>
+        <div class="gene-chip-grid" id="oe_typeGrid">${typeChips}</div>
+      </div>
+      <div class="mf-group">
+        <label class="field-label">
+          Gene Pool
+          <span class="gene-sel-count" id="oe_geneCount">${organism.genes.length} selected</span>
+        </label>
+        <div class="gene-chip-grid" id="oe_geneGrid">${genePicker}</div>
+        <div class="gene-pool-note">Click genes to toggle. Organisms randomly express a subset each generation.</div>
+      </div>
+
+      <div class="mf-group">
+        <label class="field-label">Genome <span style="color:var(--text-muted)">(Latest generated solution)</span></label>
+        <div class="test-out">[${Array.from(organism?.genome).map(v => (+v).toFixed(4)).join(', ')}]</div>
+        <div class="gene-pool-note">The solution vector is used differently for each Problem and will once per generation.</div>
+      </div>
+      
+      <div class="mf-group">
+        <label class="field-label">Logs <span style="color:var(--text-muted)">(Important life events)</span></label>
+        ${organismLogs}
+      </div>
+      <div class="code-error" id="oe_error"></div>
+    </div>`;
+
+  const footerHTML = `
+    ${isEdit ? `<button class="btn btn-warn btn-sm" id="oe_delete">&#x2297; DELETE ORGANISM</button>` : ''}
+    <button class="btn" id="oe_back">&#x2190; BACK</button>
+    <button class="btn btn-primary" id="oe_save">${isEdit ? '&#x270E; SAVE ORGANISM' : '&#x2295; CREATE ORGANISM'}</button>
+  `;
+
+
+  const overlay = createModal('orgEditModal',
+      isEdit ? `${organism.id}: ${organism.type.toUpperCase()}` : 'NEW ORGANISM',
+      bodyHTML, footerHTML
+  );
+  pushModal(overlay);
+
+  /* Type chip toggles */
+  overlay.querySelector('#oe_typeGrid').addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-type]');
+    if (!chip) return;
+    const tid  = chip.dataset.type;
+    const type = OrganismTypes.get(tid);
+    selectedType.id = tid;
+    //TODO Optionally set genes here too
+    e.currentTarget.querySelectorAll('[data-type]').forEach(c => {
+      if(c.dataset.type === tid) {
+        c.classList.toggle('gene-chip-on', true);
+        c.style.cssText = `background:${type.color}22;border-color:${type.color};color:${type.color}`;
+        c.querySelector('.gene-chip-name').style.color  = type.color;
+        c.querySelector('.gene-chip-check').style.color = type.color;
+      }else {
+        c.classList.toggle('gene-chip-on', false);
+        c.style.cssText = '';
+        c.querySelector('.gene-chip-name').style.color  = '';
+        c.querySelector('.gene-chip-check').style.color = '';
+      }
+    });
+  });
+
+  /* Gene chips */
+  overlay.querySelector('#oe_geneGrid').addEventListener('click', (e) => {
+    const chip = e.target.closest('.gene-chip[data-gene]');
+    if (!chip) return;
+    const name = chip.dataset.gene;
+    selectedGenes.has(name) ? selectedGenes.delete(name) : selectedGenes.add(name);
+    chip.classList.toggle('gene-chip-on', selectedGenes.has(name));
+    overlay.querySelector('#oe_geneCount').textContent = `${selectedGenes.size} selected`;
+  });
+
+  /* Back — pop editor, list re-appears */
+  overlay.querySelector('#oe_back').addEventListener('click', () => {
+    popModal('orgEditModal', () => {});
+  });
+
+  /* Delete */
+  overlay.querySelector('#oe_delete')?.addEventListener('click', () => {
+    if (!confirm(`Delete organism "${organism.id}"?\nThis cannot be undone. Reset the simulation after deleting.`)) return;
+    state.population.deleteOrganism(organism.id);
+    onChanged?.();
+    popModal('orgEditModal', () => {});
+  });
+
+  /* Save */
+  overlay.querySelector('#oe_save').addEventListener('click', () => {
+    const errEl = overlay.querySelector('#oe_error');
+
+    //Get the values
+    const alive  = overlay.querySelector('#org_alive').checked;
+
+    errEl.textContent = '';
+
+    //Validate type
+    const type = OrganismTypes.get(selectedType.id);
+    if (!type) {
+      errEl.innerHTML = '&#x2717; Invalid organism type ' + selectedType.label;
+      return;
+    }
+
+    //Validate genes
+    if(selectedGenes.size < 1) {
+      errEl.innerHTML = '&#x2717; Must select at least 1 gene';
+      return;
+    }
+    for(const gene of selectedGenes) {
+      const g = GeneRegistry.get(gene);
+      if(!g) {
+        errEl.innerHTML = '&#x2717; Invalid gene selected ' + gene;
+        return;
+      }
+    }
+
+    /* Auto-add to population (new orgs only) */
+    if (!isEdit) {
+      //TODO add to population
+    }else {
+      //Update in population
+      organism.type = selectedType.id;
+      organism.alive = alive;
+      organism.genes = selectedGenes;
+    }
+
+    onChanged?.();
+    popModal('orgEditModal', () => {});
   });
 }
 

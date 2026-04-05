@@ -4,7 +4,13 @@
 
 import { Population, OrganismTypes, GeneRegistry } from './engine.js';
 import { Problems } from './problems.js';
-import {openOrganismList, openGeneList, openGeneEditor} from './modals.js';
+import {
+  openOrganismList,
+  openGeneList,
+  openGeneEditor,
+  openOrganismTypeEditor,
+  openOrganismEditor
+} from './modals.js';
 import { openHelp } from './help.js';
 
 /* ── ORGANISM TYPE DEFINITIONS ──────────────────────────────── */
@@ -38,7 +44,7 @@ OrganismTypes.register({
 });
 
 /* ── STATE ─────────────────────────────────────────────────── */
-const state = {
+export const state = {
   population:   null,
   problem:      Problems[0],
   goal:         Problems[0].goals[1],
@@ -343,23 +349,57 @@ function updatePopList(organisms, best) {
     .sort((a, b) => b.fitness - a.fitness)
     .slice(0,20)
     .filter(item => item !== null);
+  el.replaceChildren();
 
-  el.innerHTML = sorted.map(org => {
-    const type   = OrganismTypes.get(org.type);
-    const col    = type?.color ?? '#6a7590';
-    const isBest = org === best;
-    return `<div class="pop-row ${isBest ? 'pop-row-best' : ''}">
-      <span class="pop-id"     style="color:${col}">#${org.id}</span>
-      <span class="pop-type"   style="color:${col}">${type?.label ?? org.type}</span>
-      <span class="pop-fitness">${org.fitness.toFixed(4)}</span>
-      <span class="pop-age">${org.age}g</span>
-      <div class="pop-genome-bar">
-        <div class="pop-genome-fill"
-             style="width:${org.fitness*100}%;background:${col}44;border-right:2px solid ${col}">
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  sorted.map(org => {
+        const type = OrganismTypes.get(org.type);
+        const col = type?.color ?? '#6a7590';
+        const isBest = org === best;
+        const popRow = document.createElement('div');
+        popRow.classList.add('pop-row');
+        if (isBest) popRow.classList.add('pop-row-best');
+        popRow.dataset.orgId = org.id;
+        popRow.addEventListener('click', (evt) => {
+          openOrganismEditor(Number(evt.currentTarget.dataset.orgId), evt,() => updatePopList(state.population.organisms, state.population.bestOrganism))
+        });
+        //ID Column
+        const idColumn = document.createElement('span');
+        idColumn.classList.add('pop-id');
+        idColumn.style = 'color:' + col;
+        idColumn.innerText = '#' + org.id;
+        popRow.appendChild(idColumn);
+
+        //ID Column
+        const typeColumn = document.createElement('span');
+        typeColumn.classList.add('pop-type');
+        typeColumn.style = 'color:' + col;
+        typeColumn.innerText = type?.label ?? org.type
+        popRow.appendChild(typeColumn);
+
+        //ID Column
+        const fitnessColumn = document.createElement('span');
+        fitnessColumn.classList.add('pop-fitness');
+        fitnessColumn.innerText = org.fitness.toFixed(4)
+        popRow.appendChild(fitnessColumn);
+
+        //ID Column
+        const ageColumn = document.createElement('span');
+        ageColumn.classList.add('pop-age');
+        ageColumn.style = `color:${col}`
+        ageColumn.innerText = `${org.age}g`;
+        popRow.appendChild(ageColumn);
+
+        //ID Column
+        const genomeColumn = document.createElement('div');
+        genomeColumn.classList.add('pop-genome-bar');
+        const genomeBar = document.createElement('div');
+        genomeBar.classList.add('pop-genome-fill');
+        genomeBar.style = `width:${org.fitness*100}%;background:${col}44;border-right:2px solid ${col}`
+        genomeColumn.appendChild(genomeBar);
+        popRow.appendChild(genomeColumn);
+
+    return popRow;
+      }).forEach(row => el.appendChild(row));
 }
 
 /* ── CHARTS ─────────────────────────────────────────────────── */
