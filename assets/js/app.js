@@ -250,7 +250,7 @@ function resetSim() {
     mutationScale: (+dom.mutScaleInput().value || state.mutScale) / 100,
     eliteCount:    +dom.eliteCountInput().value || state.eliteCount,
     deathRate: (+dom.deathRateInput().value || state.deathRate) / 100,
-    breedingChanceRate: (+dom.breedingChanceInput().value || state.breedingChance) / 100,
+    breedingChance: (+dom.breedingChanceInput().value || state.breedingChance) / 100,
   });
   pop.setProblem(state.problem);
 
@@ -323,7 +323,6 @@ function scheduleTick() {
     for (let i = 0; i < steps; i++) state.population.evolve();
     updateDashboard();
     renderViz();   // one render per tick, after all evolves for this tick
-    console.log('Max size: ' + state.population.maxSize)
   }, tickDelayMs());
 }
 

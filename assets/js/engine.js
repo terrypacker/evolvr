@@ -199,7 +199,7 @@ export class Population {
     this.mutationScale  = config.mutationScale  ?? 0.2;
     this.typeWeights    = config.typeWeights    ?? {};  // {typeId: weight 0-1}
     this.deathRate      = config.deathRate      ?? 0.1;
-    this.breedingChanceRate = config.breedingChanceRate ?? 0.5;
+    this.breedingChance = config.breedingChance ?? 0.5;
 
     this.organisms      = [];
     this.generation     = 0;
@@ -279,7 +279,7 @@ export class Population {
     const elites  = this.organisms.slice(0, this.eliteCount);
 
     //Select parents to carry over, remaining population dies and gets replaced with children
-    const parents = this.organisms.slice(0, Math.ceil(this.organisms.length * this.breedingChanceRate));
+    const parents = this.organisms.slice(0, Math.ceil(this.organisms.length * this.breedingChance));
 
     //Retain the elites and parents
     const nextGen = [...elites, ...parents.slice(this.eliteCount, parents.length)];
