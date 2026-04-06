@@ -41,6 +41,9 @@ const PeakFinder = {
   description: 'Find the global maximum of a rugged multi-modal landscape. Genomes encode X,Y coordinates in the search space.',
   goalLabel: 'Target peak height (0–1)',
   params: { peaks: null },  // generated on first use
+  settings: [
+    { id: 'numPeaks', label: 'Peaks to generate', value: 42 }
+  ],
 
   _generatePeaks(seed = 42) {
     const peaks = [];
@@ -67,6 +70,10 @@ const PeakFinder = {
     { label: '≥ 0.90', value: 0.90 },
     { label: '≥ 0.95', value: 0.95 },
   ],
+
+  regenerate(args) {
+    this.params.peaks = this._generatePeaks(args[0]);
+  },
 
   evaluate(genome, expressed, organism) {
     if (!this.params.peaks) this.params.peaks = this._generatePeaks();
@@ -147,8 +154,13 @@ const FunctionApprox = {
   description: 'Evolve a polynomial whose genome encodes coefficients. Fitness is how closely it matches a target function over [0,1].',
   goalLabel: 'Max MSE error (lower = harder)',
   params: { samples: 20 },
+  settings: [
+    { id: 'targetFn', label: 'Target function', value: 'return Math.sin(x * Math.PI * 2) * 0.5 + 0.5' }
+  ],
 
-  _targetFn: (x) => Math.sin(x * Math.PI * 2) * 0.5 + 0.5,
+  _targetFn: (x) => {
+    return Math.sin(x * Math.PI * 2) * 0.5 + 0.5;
+  },
 
   _evalPoly(genome, x) {
     // genome = [a0, a1, a2, ...] → Σ aᵢ * xⁱ
@@ -165,6 +177,10 @@ const FunctionApprox = {
     { label: 'MSE < 0.01', value: 0.01 },
     { label: 'MSE < 0.005', value: 0.005 },
   ],
+
+  regenerate(args) {
+    this._targetFn = new Function("x", args[0]);
+  },
 
   evaluate(genome, expressed, organism) {
     const n   = this.params.samples;
@@ -246,6 +262,10 @@ const Knapsack = {
   description: 'Genome bits select items to pack. Maximise value while staying within weight capacity.',
   goalLabel: 'Target value ratio (0–1)',
   params: { items: null, capacity: 0.5 },
+  settings: [
+    { id: 'numItems', label: 'Number of items', value: 12 },
+    { id: 'seed', label: 'Seed for weight and value', value: 99}
+  ],
 
   _generateItems(n = 12, seed = 99) {
     let rng = seed;
@@ -263,6 +283,10 @@ const Knapsack = {
     { label: '≥ 0.75', value: 0.75 },
     { label: '≥ 0.85', value: 0.85 },
   ],
+
+  regenerate(args) {
+    this.params.items = this._generateItems(args[0], args[1]);
+  },
 
   evaluate(genome, expressed, organism) {
     if (!this.params.items) this.params.items = this._generateItems();
@@ -392,7 +416,10 @@ const TSP = {
   description: 'Genome encodes a city-visit order. Minimise total tour distance through all cities.',
   goalLabel: 'Max tour length (lower = better)',
   params: { cities: null },
-
+  settings: [
+    { id: 'cities', label: 'Number of cities', value: 10 },
+    { id: 'seed', label: 'Seed distances', value: 7}
+  ],
   _generateCities(n = 10, seed = 7) {
     let rng = seed;
     const rand = () => { rng = (rng * 1103515245 + 12345) & 0x7fffffff; return rng / 0x7fffffff; };
@@ -415,6 +442,10 @@ const TSP = {
     { label: 'Tour < 2.5', value: 2.5 },
     { label: 'Tour < 2.0', value: 2.0 },
   ],
+
+  regenerate(args) {
+    this.params.cities = this._generateCities(args[0], args[1]);
+  },
 
   evaluate(genome, expressed, organism) {
     if (!this.params.cities) this.params.cities = this._generateCities();

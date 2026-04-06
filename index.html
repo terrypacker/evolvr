@@ -56,51 +56,81 @@
 
     <!-- ── LEFT COLUMN: config ────────────────────────────── -->
     <div class="left-col">
-
-      <!-- Problem Selection -->
-      <div class="panel">
-        <div class="panel-header">
+      <div class="tab">
+        <div id="problemTabHeader" class="panel-header tab-header active">
           <span class="panel-tag">PROB</span>
           <span class="panel-title">PROBLEM</span>
         </div>
-        <div class="problem-wrap">
-          <label class="field-label">Optimization target</label>
-          <select class="field-select" id="problemSel"></select>
-          <div class="problem-desc" id="problemDesc"></div>
-          <div style="margin-top:10px">
-            <label class="field-label" id="goalLabel">Goal</label>
-            <select class="field-select" id="goalSel"></select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Population Config -->
-      <div class="panel">
-        <div class="panel-header">
+        <div id="problemSettingsTabHeader" class="panel-header tab-header">
           <span class="panel-tag">CFG</span>
           <span class="panel-title">PARAMETERS</span>
         </div>
-        <div class="config-row">
-          <div class="config-item">
-            <label>Max Pop</label>
-            <input type="number" id="maxPopInput" value="40" min="10" max="200">
-          </div>
-          <div class="config-item">
-            <label>Mut% Rate</label>
-            <input type="number" id="mutRateInput" value="10" min="1" max="50">
-          </div>
-          <div class="config-item">
-            <label>Mut% Scale</label>
-            <input type="number" id="mutScaleInput" value="20" min="1" max="80">
+      </div>
+      <div id="problemTab" class="tab-content" style="display:block">
+        <!-- Problem Selection -->
+        <div class="panel">
+          <div class="problem-wrap">
+            <label class="field-label">Optimization target</label>
+            <select class="field-select" id="problemSel"></select>
+            <div class="problem-desc" id="problemDesc"></div>
+            <div style="margin-top:10px">
+              <label class="field-label" id="goalLabel">Goal</label>
+              <select class="field-select" id="goalSel"></select>
+            </div>
+            <div id="problemSettings" style="margin-top:10px">
+            </div>
+            <div style="margin-top:10px">
+              <button class="btn" id="problemRegenerateButton">Regenerate</button>
+            </div>
           </div>
         </div>
-        <div class="divider" style="margin:0 14px"></div>
-        <div class="panel-body-compact">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <label class="field-label" style="margin:0">ORGANISM TYPES</label>
-            <button class="btn btn-sm" id="btnEditTypes">✎ EDIT TYPES</button>
+      </div>
+      <div id="problemSettingsTab" class="tab-content">
+        <!-- Population Config -->
+        <div class="panel">
+          <div class="config-row">
+            <div class="config-item">
+              <label>Max Pop</label>
+              <input type="number" id="maxPopInput" value="40" min="10" max="200">
+            </div>
+            <div class="config-item">
+              <label>Mut% Rate</label>
+              <input type="number" id="mutRateInput" value="10" min="1" max="50">
+            </div>
+            <div class="config-item">
+              <label>Mut% Scale</label>
+              <input type="number" id="mutScaleInput" value="20" min="1" max="80">
+            </div>
           </div>
-          <div id="typeWeightControls"></div>
+          <div class="config-row">
+            <div class="config-item">
+              <label>Elite count</label>
+              <input type="number" id="eliteCountInput" value="3" min="0" max="200">
+              <div class="gene-pool-note">Always retain this number of the fittest organisms</div>
+            </div>
+          </div>
+          <div class="config-row">
+            <div class="config-item">
+              <label>Death % rate</label>
+              <input type="number" id="deathRateInput" value="10" min="0" max="100">
+              <div class="gene-pool-note">Percentage of population that dies every generation</div>
+            </div>
+          </div>
+          <div class="config-row">
+            <div class="config-item">
+              <label>Breeding % rate</label>
+              <input type="number" id="breedingChanceInput" value="10" min="0" max="100">
+              <div class="gene-pool-note">Chances to breed</div>
+            </div>
+          </div>
+          <div class="divider" style="margin:0 14px"></div>
+          <div class="panel-body-compact">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <label class="field-label" style="margin:0">ORGANISM TYPES</label>
+              <button class="btn btn-sm" id="btnEditTypes">✎ EDIT TYPES</button>
+            </div>
+            <div id="typeWeightControls"></div>
+          </div>
         </div>
       </div>
 

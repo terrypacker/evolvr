@@ -43,7 +43,7 @@ OrganismTypes.register({
   mutationRate: 0.30, mutationScale: 0.40,
 });
 
-/* ── STATE ─────────────────────────────────────────────────── */
+/* ── STATE DEFAULTS ───────────────────────────────────────── */
 export const state = {
   population:   null,
   problem:      Problems[0],
@@ -56,6 +56,8 @@ export const state = {
   maxPop:       40,
   mutRate:      10,
   mutScale:     20,
+  eliteCount:   3,
+  deathRate:    0.1,
 };
 
 /* ── DOM REFS ──────────────────────────────────────────────── */
@@ -86,6 +88,11 @@ const dom = {
   maxPopInput:   () => $('maxPopInput'),
   mutRateInput:  () => $('mutRateInput'),
   mutScaleInput: () => $('mutScaleInput'),
+  eliteCountInput: () => $('eliteCountInput'),
+  deathRateInput: () => $('deathRateInput'),
+  breedingChanceInput: () => $('breedingChanceInput'),
+  problemSettings: () => $('problemSettings'),
+  problemRegenerateButton: () => $('problemRegenerateButton')
 };
 
 /* ── CHART STATE ────────────────────────────────────────────── */
@@ -109,6 +116,7 @@ function tickDelayMs()   { return Math.max(50, 1000 / state.speed); }
 function init() {
   buildProblemSelector();
   buildGoalSelector();
+  buildProblemSettings();
   buildTypeWeightControls();
   buildGenePanel();
   initCharts();
@@ -156,6 +164,22 @@ function buildGoalSelector() {
   sel.value = state.goal.value;
   dom.goalLabel().textContent   = state.problem.goalLabel;
   $('problemDesc').textContent  = state.problem.description;
+}
+
+function buildProblemSettings() {
+  const paramsDiv = dom.problemSettings();
+  paramsDiv.innerHTML = '';
+  for (const p of state.problem.settings) {
+    const label = document.createElement('label');
+    label.textContent = p.label;
+    label.classList.add('field-label');
+    const input = document.createElement('input');
+    input.value = p.value;
+    input.id = 'problem-setting-' + p.id;
+    input.classList.add('field-input');
+    paramsDiv.appendChild(label);
+    paramsDiv.appendChild(input)
+  }
 }
 
 function buildTypeWeightControls() {
@@ -224,9 +248,9 @@ function resetSim() {
     maxSize:       +dom.maxPopInput().value   || state.maxPop,
     mutationRate:  (+dom.mutRateInput().value  || state.mutRate)  / 100,
     mutationScale: (+dom.mutScaleInput().value || state.mutScale) / 100,
-    eliteCount:    3,
-    deathRate: 0.2,
-    breedingChanceRate: 0.5
+    eliteCount:    +dom.eliteCountInput().value || state.eliteCount,
+    deathRate: (+dom.deathRateInput().value || state.deathRate) / 100,
+    breedingChanceRate: (+dom.breedingChanceInput().value || state.breedingChance) / 100,
   });
   pop.setProblem(state.problem);
 
@@ -299,6 +323,7 @@ function scheduleTick() {
     for (let i = 0; i < steps; i++) state.population.evolve();
     updateDashboard();
     renderViz();   // one render per tick, after all evolves for this tick
+    console.log('Max size: ' + state.population.maxSize)
   }, tickDelayMs());
 }
 
@@ -503,6 +528,7 @@ function wireEvents() {
     if (p) {
       state.problem = p;
       buildGoalSelector();
+      buildProblemSettings();
       resetSim();
     }
   });
@@ -515,9 +541,30 @@ function wireEvents() {
     if (!state.running) renderOnce();
   });
 
-  // Config inputs — changes apply on next RESET only
-  [dom.maxPopInput(), dom.mutRateInput(), dom.mutScaleInput()]
-    .forEach(el => el?.addEventListener('change', () => {}));
+  // Config inputs —
+  dom.maxPopInput().addEventListener('change', (evt) => {
+    state.population.maxSize = Number(evt.target.value);
+  });
+
+  dom.mutRateInput().addEventListener('change', (evt) => {
+    state.population.mutationRate = Number(evt.target.value);
+  });
+
+  dom.mutScaleInput().addEventListener('change', (evt) => {
+    state.population.mutationScale = Number(evt.target.value);
+  });
+
+  dom.eliteCountInput().addEventListener('change', (evt) => {
+    state.population.eliteCount = Number(evt.target.value);
+  });
+
+  dom.deathRateInput().addEventListener('change', (evt) => {
+    state.population.deathRate = Number(evt.target.value) / 100;
+  });
+
+  dom.breedingChanceInput().addEventListener('change', (evt) => {
+    state.population.breedingChance = Number(evt.target.value) / 100;
+  });
 
   document.getElementById('btnHelp')?.addEventListener('click', openHelp);
 
@@ -528,8 +575,35 @@ function wireEvents() {
     openGeneList(onRegistryChanged);
   });
 
+  document.getElementById('problemTabHeader')?.addEventListener('click', (evt) => {
+    openTab(evt, 'problemTab')
+  });
+
+  document.getElementById('problemSettingsTabHeader')?.addEventListener('click', (evt) => {
+    openTab(evt, 'problemSettingsTab')
+  });
+
+  document.getElementById('problemRegenerateButton')?.addEventListener('click', (evt) => {
+    const args = [];
+    for (const p of state.problem.settings) {
+      const s = $('problem-setting-' + p.id).value;
+      args.push(s);
+    }
+    state.problem.regenerate(args);
+    renderViz();
+  });
+
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
+}
+
+function openTab(evt, tabName) {
+  // Hide content, remove active class, then show target
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = "none");
+  document.querySelectorAll('.tab-header').forEach(el => el.classList.remove("active"));
+  const tab = document.getElementById(tabName);
+  tab.style.display = "block";
+  evt.currentTarget.classList.add("active");
 }
 
 function resizeCanvas() {
