@@ -1,0 +1,39 @@
+<p>EVOLVR is a <strong>genetic algorithm playground</strong> — a live simulation where populations of programs called <em>organisms</em> compete and breed to solve optimization problems.</p>
+
+<p>Instead of being hand-coded, each organism <strong>evolves</strong>. It combines its genome with a partner's to produce offspring that inherit traits from both parents, with small random mutations introduced along the way. Organisms that score higher on the active problem survive and reproduce more; weaker ones are replaced by their children.</p>
+
+<div class="help-concept-grid">
+  <div class="help-concept">
+    <div class="help-concept-icon" style="color:var(--amber)">⬡</div>
+    <div class="help-concept-label">Genome</div>
+    <div class="help-concept-desc">An array of decimal numbers between 0 and 1. This is the organism's raw "DNA" — the numbers that get recombined and mutated across generations.</div>
+  </div>
+  <div class="help-concept">
+    <div class="help-concept-icon" style="color:var(--cyan)">◈</div>
+    <div class="help-concept-label">Gene</div>
+    <div class="help-concept-desc">A JavaScript function that transforms the genome array before it's evaluated. Genes are the "skills" an organism expresses — they shape how the genome is interpreted.</div>
+  </div>
+  <div class="help-concept">
+    <div class="help-concept-icon" style="color:var(--green)">◎</div>
+    <div class="help-concept-label">Organism Type</div>
+    <div class="help-concept-desc">A species template — defines which genes are available, genome length, and how aggressively the organism mutates. Different types have different evolutionary strategies.</div>
+  </div>
+  <div class="help-concept">
+    <div class="help-concept-icon" style="color:var(--purple)">⬟</div>
+    <div class="help-concept-label">Fitness</div>
+    <div class="help-concept-desc">A score from 0 to 1 that measures how well an organism solves the active problem. Higher fitness = better solution. This drives selection — fitter organisms breed more.</div>
+  </div>
+</div>
+
+<div class="help-flow">
+  <div class="help-flow-step">Seed<br><span>random genomes</span></div>
+  <div class="help-flow-arrow">→</div>
+  <div class="help-flow-step">Express<br><span>apply genes</span></div>
+  <div class="help-flow-arrow">→</div>
+  <div class="help-flow-step">Evaluate<br><span>score fitness</span></div>
+  <div class="help-flow-arrow">→</div>
+  <div class="help-flow-step">Select<br><span>keep best 50%</span></div>
+  <div class="help-flow-arrow">→</div>
+  <div class="help-flow-step">Reproduce<br><span>crossover + mutate</span></div>
+  <div class="help-flow-arrow">↻</div>
+</div>

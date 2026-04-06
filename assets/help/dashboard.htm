@@ -1,0 +1,24 @@
+<p>The Dashboard shows five live metrics updated every generation. These give you an instant read on how the simulation is progressing.</p>
+
+<div class="help-item-list">
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag">Generation</span></div>
+    <p>How many generations have elapsed since the last reset. A <em>generation</em> is one full cycle of evaluation → selection → reproduction. At speed 1× roughly one generation passes per second; at 20× with batch stepping it can be hundreds per second.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag">Best Fitness</span></div>
+    <p>The highest fitness score (0–1) achieved by any organism in the current population. This value monotonically increases or stays flat — it can never decrease because elite organisms always survive to the next generation.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag">Avg Fitness</span></div>
+    <p>The mean fitness across all organisms. The gap between Best and Avg tells you about population diversity — a large gap means a few exceptional individuals in a sea of struggling ones; a small gap means the population has converged.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag">Population</span></div>
+    <p>Current organism count. This should remain close to Max Pop. If it drops significantly, check that your organism type weights add up to a meaningful number of organisms.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag">Goal</span></div>
+    <p>Shows the active goal threshold and turns <span style="color:var(--green)">green with ✓ ACHIEVED</span> when Best Fitness crosses it. This is purely informational — the simulation continues running after the goal is reached, often finding even better solutions.</p>
+  </div>
+</div>

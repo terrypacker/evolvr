@@ -1,0 +1,14 @@
+<p>The Event Stream records notable milestones as the simulation runs. Entries are prepended to the top, so the most recent events appear first.</p>
+
+<div class="help-item-list">
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag">New best</span></div>
+    <p>Logged whenever a new highest fitness is achieved. Shows the organism ID, type, and exact fitness score. These events mark real evolutionary progress.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag">Generation summaries</span></div>
+    <p>Every 10 generations a summary is logged showing the generation number, population size, and average fitness. Use these to gauge overall convergence speed.</p>
+  </div>
+</div>
+
+<p>The generation number prefix (e.g. <span style="color:var(--amber-dim);font-family:var(--font-mono)">G47</span>) lets you correlate events with the fitness history chart. Up to 50 events are stored; older entries are discarded as new ones arrive.</p>

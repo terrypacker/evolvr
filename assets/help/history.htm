@@ -1,0 +1,16 @@
+<p>The Fitness History panel shows two live charts beneath the main visualization.</p>
+
+<div class="help-item-list">
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--amber);border-color:var(--amber-dim)">━ BEST (amber line)</span></div>
+    <p>The best fitness score each generation. This line should trend upward as the population improves. A flat plateau means the population has converged — try increasing mutation rate or adding Mutant-type organisms to escape it.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag">━ AVG (grey line)</span></div>
+    <p>The average fitness each generation. This line being well below Best indicates high diversity; tracking close to Best means the population has converged. The amber goal line is drawn horizontally for reference.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag">TYPE DISTRIBUTION bar</span></div>
+    <p>A segmented horizontal bar showing the current proportion of each organism type in the population. Each segment is coloured by type. Because new organisms can inherit the type of either parent, the mix can shift across generations — watch which types come to dominate as evolution progresses.</p>
+  </div>
+</div>

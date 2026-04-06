@@ -1,0 +1,42 @@
+<p>The Parameters panel controls the global population dynamics and the mix of organism types. Changes here take effect on the next <strong>RESET</strong>.</p>
+
+<div class="help-item-list">
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--cyan)">Max Pop</span></div>
+    <p>The maximum number of organisms in the population. Range: 10–200. Larger populations explore the fitness landscape more broadly but run slower. Smaller populations converge faster but may get stuck in local optima. <strong>40–60</strong> is a good starting range.</p>
+  </div>
+
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--cyan)">Mut% Rate</span></div>
+    <p>The probability (as a percentage) that any individual genome value is mutated during reproduction. Range: 1–50%. A low rate (5–10%) means offspring closely resemble their parents. A high rate (25%+) introduces more diversity but can disrupt good solutions. <strong>10%</strong> is the default.</p>
+  </div>
+
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--cyan)">Mut% Scale</span></div>
+    <p>How large each mutation is when it occurs. A scale of 20% means a mutated gene shifts by up to ±0.20 from its current value (clamped to [0, 1]). Higher scale = wilder mutations that can leap across the search space. Lower scale = fine-grained local adjustments. <strong>20%</strong> is the default.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--cyan)">Elite Count</span></div>
+    <p>This parameter determines how many of the top-performing (fittest) individuals in the current population are automatically preserved and carried over to the next generation without modification. By guaranteeing that these high-quality solutions survive, elite count helps maintain strong genetic material and can speed up convergence toward optimal solutions, though setting it too high may reduce diversity in the population.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--cyan)">Death % Rate</span></div>
+    <p>This parameter specifies the proportion of the population—excluding elite individuals—that will be removed in each generation. It controls the intensity of selection pressure by determining how aggressively less-fit individuals are eliminated, making room for new offspring. Higher values increase turnover and exploration but can reduce stability, while lower values preserve more individuals and maintain diversity at the cost of slower adaptation.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--cyan)">Breeding % Rate</span></div>
+    <p>This parameter determines the proportion of the population selected to act as parents for producing the next generation. It influences how many individuals contribute genetic material to offspring, balancing exploration and exploitation. Higher values allow more diverse individuals to breed, increasing genetic variety, while lower values focus reproduction on the fittest candidates, potentially accelerating convergence but reducing diversity.</p>
+  </div>
+</div>
+
+<h4 class="help-subhead">Organism Type Weights</h4>
+<p>Each registered organism type has a slider controlling what proportion of the initial population it makes up. The sliders are relative — they're normalised so the population is always filled to Max Pop. Setting a type's weight to <strong>0</strong> excludes it entirely.</p>
+
+<div class="help-tip">
+  <span class="help-tip-icon">💡</span>
+  <span>Try running with a single type at 100% to see how it behaves in isolation, then mix types to observe how different strategies interact and compete.</span>
+</div>
+
+<h4 class="help-subhead">✎ EDIT TYPES Button</h4>
+<p>Opens the <strong>Organism Types</strong> editor (see the <em>Organism Types</em> section below for full details). After editing types, click <strong>RESET</strong> on the main page to apply the changes.</p>
+

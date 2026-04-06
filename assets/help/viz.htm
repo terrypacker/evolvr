@@ -1,0 +1,25 @@
+<p>The central canvas renders a live visualization of the population, updated every frame. Each problem has its own visualization style designed to make the evolutionary process visible and intuitive.</p>
+
+<div class="help-item-list">
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--amber);border-color:var(--amber-dim)">Peak Finder</span></div>
+    <p>Shows the multi-modal fitness landscape as a heat map — brighter (more orange) areas are higher fitness peaks. Each organism appears as a coloured dot sized by its fitness. The <strong>best organism</strong> is shown with a bright ring around it. Watch the population drift toward peaks and cluster around the global maximum over time.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--cyan);border-color:var(--cyan-dim)">Function Approximation</span></div>
+    <p>The amber line is the target function. Each organism's polynomial curve is drawn in its type colour, with higher-fitness organisms drawn more opaque. The best organism's curve is thicker. You'll see the population's curves converge toward the target over generations.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--green);border-color:var(--green-dim)">Knapsack</span></div>
+    <p>Each vertical bar pair represents an item — the blue portion is its weight, the amber portion its value. Cyan outlines mark which items the best organism selected. The red dashed line is the weight capacity limit. A good solution keeps total weight under the line while maximising total value.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--purple);border-color:#604090">Traveling Salesman</span></div>
+    <p>Cities are cyan dots. Each organism's tour is drawn as faint lines in its type colour. The best organism's tour is highlighted in amber. Watch the amber tour shorten and straighten as the population discovers more efficient routes.</p>
+  </div>
+</div>
+
+<div class="help-tip">
+  <span class="help-tip-icon">💡</span>
+  <span>The visualization updates at 60fps independently of the simulation speed — you'll always see a smooth live picture even at maximum speed.</span>
+</div>

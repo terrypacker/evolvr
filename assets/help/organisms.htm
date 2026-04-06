@@ -1,0 +1,26 @@
+<p>The Organisms panel lists the top 20 organisms by fitness, updated each generation. Each row shows key information about a single organism.</p>
+
+<div class="help-item-list">
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--green);border-color:var(--green-dim)">ID</span></div>
+    <p>A unique sequential number assigned at birth. IDs increase monotonically — higher IDs are younger organisms. The ID resets to 1 on each simulation reset.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--green);border-color:var(--green-dim)">TYPE</span></div>
+    <p>The organism type, coloured to match its type definition. Types can shift across generations — an organism inherits the type of one of its parents, and occasionally "crosses" to the other parent's type.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--green);border-color:var(--green-dim)">FITNESS</span></div>
+    <p>The most recently computed fitness score (0–1). The list is sorted by this value, highest first.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--green);border-color:var(--green-dim)">AGE</span></div>
+    <p>How many generations this organism has survived (shown as "g"). Elite organisms — the top 3 by fitness — survive intact to the next generation without reproduction, so they can accumulate age while everyone else is replaced.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--green);border-color:var(--green-dim)">GENOME bar</span></div>
+    <p>A proportional bar showing the organism's fitness visually. The bar fills in the organism's type colour, making it easy to scan for the strongest performers at a glance.</p>
+  </div>
+</div>
+
+<p>The <strong>best organism</strong> has a highlighted amber border on its row. This is the organism whose genome and gene expression is used as the "champion" in the visualization.</p>

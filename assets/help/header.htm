@@ -1,0 +1,36 @@
+<p>The header bar runs the simulation and controls its speed. These controls affect all panels simultaneously.</p>
+
+<div class="help-item-list">
+  <div class="help-item">
+    <div class="help-item-head">
+      <span class="help-tag" style="background:var(--amber-glow);border-color:var(--amber-dim);color:var(--amber)">▶ RUN / ⏸ PAUSE</span>
+    </div>
+    <p>Starts or pauses the simulation loop. While running, the population evolves automatically at the rate set by the Speed slider. The status dot turns green and pulses when the simulation is active.</p>
+  </div>
+
+  <div class="help-item">
+    <div class="help-item-head">
+      <span class="help-tag">↷ STEP</span>
+    </div>
+    <p>Advances the simulation by exactly <strong>one generation</strong> then pauses. Useful for watching evolution happen slowly and inspecting each generation's changes in the Organisms panel.</p>
+  </div>
+
+  <div class="help-item">
+    <div class="help-item-head">
+      <span class="help-tag" style="background:rgba(255,68,85,0.08);border-color:var(--red-dim);color:var(--red)">⟳ RESET</span>
+    </div>
+    <p>Stops the simulation and re-seeds a brand new population from scratch using the current Parameters and Type Weight settings. All history is cleared. <strong>Always reset after changing organism types, genes, or population parameters</strong> so the changes take effect.</p>
+  </div>
+
+  <div class="help-item">
+    <div class="help-item-head">
+      <span class="help-tag">SPEED 1×–20×</span>
+    </div>
+    <p>Controls how many generations evolve per second. At low speeds (1×–4×) you can watch each generation clearly. At higher speeds (10×–20×) the simulation runs multiple steps per tick — useful for letting it converge on a solution quickly. The visualization updates in real time regardless of speed.</p>
+  </div>
+</div>
+
+<div class="help-tip">
+  <span class="help-tip-icon">⚡</span>
+  <span>Start with <strong>STEP</strong> to understand what one generation looks like, then switch to <strong>RUN</strong> at a comfortable speed to watch the population converge.</span>
+</div>

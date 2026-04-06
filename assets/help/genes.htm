@@ -1,0 +1,99 @@
+<p>The Gene Registry panel lists all registered genes — the transformation functions that organisms express before their genome is evaluated. Genes are the core "intelligence" of the simulation: they shape how a raw genome array gets processed into a useful solution.</p>
+
+<h4 class="help-subhead">How Genes Work</h4>
+<p>When an organism is evaluated, each of its active genes is called in sequence, passing the genome through a chain of transformations:</p>
+
+<div class="help-code-block"><span class="hljs-comment">// Each gene receives the current genome array and returns a new one</span>
+  genome <span class="hljs-op">→</span> gene1(genome) <span class="hljs-op">→</span> gene2(result) <span class="hljs-op">→</span> gene3(result) <span class="hljs-op">→</span> expressed_values
+</div>
+
+<p>The final <code>expressed_values</code> array is what the problem's <code>evaluate()</code> function receives. This means genes can pre-process, sort, scale, or otherwise reshape the genome before it's scored — allowing the same raw genome to be interpreted very differently depending on which genes are active.</p>
+
+<h4 class="help-subhead">Opening the Gene Editor</h4>
+<p>Click <strong>✎ EDIT</strong> in the Gene Registry panel header, or the <strong>✎ EDIT</strong> button next to any gene in the gene list modal.</p>
+
+<div class="help-item-list">
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--purple);border-color:#604090">⊕ NEW GENE</span></div>
+    <p>Opens a blank gene editor. Write the function body, assign organism types, then save. The gene is immediately available for use in organism type gene pools.</p>
+  </div>
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag">✎ EDIT (per gene)</span></div>
+    <p>Pre-fills the editor with the gene's current function body and type assignments. The name cannot be changed after creation.</p>
+  </div>
+</div>
+
+<h4 class="help-subhead">Gene Editor Fields</h4>
+
+<div class="help-field-grid">
+  <div class="help-field">
+    <div class="help-field-name">Gene Name</div>
+    <div class="help-field-desc">A unique camelCase identifier — no spaces or special characters. Examples: <code>spiralSearch</code>, <code>mirrorFold</code>, <code>boltzmannSelect</code>. The name is shown in organism type gene pools and the registry panel.</div>
+  </div>
+  <div class="help-field">
+    <div class="help-field-name">Organism Types</div>
+    <div class="help-field-desc">Which organism types are eligible to carry this gene. Shown as coloured chips matching each type's colour. Saving a gene automatically adds or removes it from each type's gene pool to match your selection.</div>
+  </div>
+  <div class="help-field">
+    <div class="help-field-name">Function Body</div>
+    <div class="help-field-desc">The JavaScript code that runs when this gene is expressed. It receives <code>genome</code> (a number array) and <code>params</code> (an object from the active problem). It <strong>must return a new array</strong> of numbers, ideally the same length as the input.</div>
+  </div>
+</div>
+
+<h4 class="help-subhead">Writing Gene Functions</h4>
+<p>The function signature is always <code>function(genome, params)</code>. Here are examples ranging from simple to advanced:</p>
+
+<div class="help-code-block"><span class="hljs-comment">// Clamp all values toward the centre — reduces extremes</span>
+  <span class="hljs-kw">return</span> genome.<span class="hljs-fn">map</span>(v <span class="hljs-op">=&gt;</span> v + (<span class="hljs-num">0.5</span> - v) * <span class="hljs-num">0.05</span>);
+</div>
+
+<div class="help-code-block"><span class="hljs-comment">// Sort genome values by rank — good for ordering problems like TSP</span>
+  <span class="hljs-kw">const</span> idx = genome.<span class="hljs-fn">map</span>((v, i) <span class="hljs-op">=&gt;</span> [v, i]).<span class="hljs-fn">sort</span>((a, b) <span class="hljs-op">=&gt;</span> a[<span class="hljs-num">0</span>] - b[<span class="hljs-num">0</span>]);
+  <span class="hljs-kw">const</span> out = <span class="hljs-kw">new</span> <span class="hljs-fn">Array</span>(genome.length);
+  idx.<span class="hljs-fn">forEach</span>(([, i], rank) <span class="hljs-op">=&gt;</span> { out[i] = rank / (genome.length - <span class="hljs-num">1</span>); });
+  <span class="hljs-kw">return</span> out;
+</div>
+
+<div class="help-code-block"><span class="hljs-comment">// Mirror second half — forces symmetry in the genome</span>
+  <span class="hljs-kw">const</span> half = Math.<span class="hljs-fn">floor</span>(genome.length / <span class="hljs-num">2</span>);
+  <span class="hljs-kw">const</span> out  = [...genome];
+  <span class="hljs-kw">for</span> (<span class="hljs-kw">let</span> i = <span class="hljs-num">0</span>; i &lt; half; i++) out[i + half] = <span class="hljs-num">1</span> - out[i];
+  <span class="hljs-kw">return</span> out;
+</div>
+
+<div class="help-code-block"><span class="hljs-comment">// Gaussian noise — subtle perturbation using Box-Muller transform</span>
+  <span class="hljs-kw">return</span> genome.<span class="hljs-fn">map</span>(v <span class="hljs-op">=&gt;</span> {
+  <span class="hljs-kw">const</span> u  = Math.<span class="hljs-fn">random</span>(), u2 = Math.<span class="hljs-fn">random</span>();
+  <span class="hljs-kw">const</span> n  = Math.<span class="hljs-fn">sqrt</span>(-<span class="hljs-num">2</span> * Math.<span class="hljs-fn">log</span>(u)) * Math.<span class="hljs-fn">cos</span>(<span class="hljs-num">2</span> * Math.PI * u2);
+  <span class="hljs-kw">return</span> Math.<span class="hljs-fn">max</span>(<span class="hljs-num">0</span>, Math.<span class="hljs-fn">min</span>(<span class="hljs-num">1</span>, v + n * <span class="hljs-num">0.04</span>));
+  });
+</div>
+
+<div class="help-item-list" style="margin-top:8px">
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--green);border-color:var(--green-dim)">▶ TEST Button</span></div>
+    <p>Runs the current function body with 8 random genome values and shows the input and output arrays side by side. Use this to verify your function works and returns the expected kind of values before saving. Any JavaScript error will appear in red beneath the editor.</p>
+  </div>
+</div>
+
+<h4 class="help-subhead">Default Genes Reference</h4>
+<div class="help-gene-table">
+  <div class="help-gene-row header">
+    <span>Gene</span><span>Types</span><span>What it does</span>
+  </div>
+  <div class="help-gene-row"><span class="mono">boundaryPush</span><span>Explorer, Mutant</span><span>Nudges extreme values (near 0 or 1) back toward the interior of the search space</span></div>
+  <div class="help-gene-row"><span class="mono">randomWalk</span><span>Explorer, Mutant</span><span>Randomly shifts one genome value by a small amount each time — creates local exploration</span></div>
+  <div class="help-gene-row"><span class="mono">mirrorFold</span><span>Explorer</span><span>Mirrors the first half of the genome into the second half (inverted) — forces structural symmetry</span></div>
+  <div class="help-gene-row"><span class="mono">gradientNudge</span><span>Climber, Optimizer</span><span>Gently pulls all values toward 0.5 — reduces extremes and stabilises the genome</span></div>
+  <div class="help-gene-row"><span class="mono">elitePull</span><span>Climber</span><span>Scales the whole genome slightly toward the centre — conservative convergence</span></div>
+  <div class="help-gene-row"><span class="mono">sinTransform</span><span>Optimizer, Climber</span><span>Applies a sine curve to each value — remaps the genome non-linearly, compressing extremes</span></div>
+  <div class="help-gene-row"><span class="mono">normalize</span><span>Optimizer, Mutant</span><span>Divides all values by the maximum — scales the genome to fill [0, 1] relative to itself</span></div>
+  <div class="help-gene-row"><span class="mono">rankSort</span><span>Optimizer</span><span>Replaces values with their rank order (as fractions of genome length) — useful for ordering problems</span></div>
+  <div class="help-gene-row"><span class="mono">bitFlip</span><span>Mutant</span><span>Randomly replaces ~5% of genome values with new random numbers — high-entropy disruption</span></div>
+  <div class="help-gene-row"><span class="mono">gaussianNoise</span><span>Mutant, Explorer</span><span>Adds normally-distributed noise to every value — realistic biological mutation model</span></div>
+</div>
+
+<div class="help-tip">
+  <span class="help-tip-icon">⚠</span>
+  <span>Deleting a gene removes it from the registry but does not remove it from organism type gene pools automatically. Open each affected type in the type editor and deselect the deleted gene, then reset.</span>
+</div>

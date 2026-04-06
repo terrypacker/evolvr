@@ -1,0 +1,41 @@
+<h4 class="help-subhead">Type Editor Fields</h4>
+
+<div class="help-field-grid">
+  <div class="help-field">
+    <div class="help-field-name">Display Name</div>
+    <div class="help-field-desc">The human-readable name shown in the type weight sliders, population list, and visualizations. Can include spaces and special characters.</div>
+  </div>
+  <div class="help-field">
+    <div class="help-field-name">ID</div>
+    <div class="help-field-desc">A unique machine identifier — no spaces, letters and numbers only. This is set once at creation and cannot be changed. Used internally to link organisms to their type definition.</div>
+  </div>
+  <div class="help-field">
+    <div class="help-field-name">Description</div>
+    <div class="help-field-desc">A short description of this type's evolutionary strategy. Shown as a tooltip on the weight sliders. Helps you remember what each type is optimised for.</div>
+  </div>
+  <div class="help-field">
+    <div class="help-field-name">Genome Length</div>
+    <div class="help-field-desc">How many values are in this type's genome array. Range: 4–32. Longer genomes can encode more complex solutions but take longer to optimise. Match this to the problem — e.g. TSP with 10 cities needs at least 10 genome values.</div>
+  </div>
+  <div class="help-field">
+    <div class="help-field-name">Mutation Rate %</div>
+    <div class="help-field-desc">Per-gene mutation probability for this type only. Overrides the global Mut% Rate for organisms of this type. Use high rates (20–40%) for exploratory types, low rates (3–8%) for convergence-focused types.</div>
+  </div>
+  <div class="help-field">
+    <div class="help-field-name">Mutation Scale %</div>
+    <div class="help-field-desc">How much each mutation shifts a gene value. Per-type override of the global Mut% Scale. High scale = bold leaps; low scale = careful refinement.</div>
+  </div>
+  <div class="help-field">
+    <div class="help-field-name">Colour</div>
+    <div class="help-field-desc">The colour used to represent this type in the visualizations, population list, and type distribution bar. Click a swatch from the palette or type any valid hex colour directly.</div>
+  </div>
+  <div class="help-field">
+    <div class="help-field-name">Gene Pool</div>
+    <div class="help-field-desc">The set of genes this type can express. Click gene chips to toggle them on (highlighted in amber) or off. At least one gene must be selected. Each organism randomly expresses a subset of its pool each generation — having more genes in the pool creates more behavioural variety within the type.</div>
+  </div>
+</div>
+
+<div class="help-tip">
+  <span class="help-tip-icon">⚠</span>
+  <span>Deleting a type removes it from future populations but does not affect organisms already in a running simulation. Always <strong>RESET</strong> after editing types to see the changes.</span>
+</div>

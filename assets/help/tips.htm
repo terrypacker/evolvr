@@ -1,0 +1,41 @@
+<h4 class="help-subhead">Getting Started</h4>
+<div class="help-item-list">
+  <div class="help-item">
+    <p>1. Leave all defaults. Click <strong>▶ RUN</strong> at speed 3×. Watch the population converge on Peak Finder. The best organism's dot will migrate toward the brightest part of the heat map.</p>
+  </div>
+  <div class="help-item">
+    <p>2. Once it plateaus, increase <strong>Mut% Rate</strong> to 30%, hit <strong>RESET</strong>, and run again. Notice the more chaotic initial search, which often finds better peaks.</p>
+  </div>
+  <div class="help-item">
+    <p>3. Try setting all type weights to 0 except <strong>Mutant</strong>. Reset and run. Then try with only <strong>Climber</strong>. Compare how quickly each type converges and how high it gets.</p>
+  </div>
+</div>
+
+<h4 class="help-subhead">Interesting Experiments</h4>
+<div class="help-tip-grid">
+  <div class="help-tip-card">
+    <div class="help-tip-card-title">Monoculture vs Diversity</div>
+    <p>Run with a single type at 100%, note the final fitness reached after 200 generations. Then run with all four types balanced equally. Mixed populations often find better solutions because different strategies complement each other.</p>
+  </div>
+  <div class="help-tip-card">
+    <div class="help-tip-card-title">Gene Surgery</div>
+    <p>Open the Gene editor and add the <code>rankSort</code> gene to the Explorer type. Reset and try the Traveling Salesman problem. The ordering capability of rankSort makes Explorers suddenly much more competitive on TSP.</p>
+  </div>
+  <div class="help-tip-card">
+    <div class="help-tip-card-title">Custom Type Design</div>
+    <p>Create a new type called "Hybrid" with a low mutation rate (5%), medium scale (15%), and every gene from every type in its pool. It will express a random mix of strategies each generation — sometimes this outperforms specialists.</p>
+  </div>
+  <div class="help-tip-card">
+    <div class="help-tip-card-title">Write Your Own Gene</div>
+    <p>Open the Gene editor, create a new gene. Try: <code>return genome.map((v,i) => i%2===0 ? v*v : Math.sqrt(v));</code> — this applies a power curve to alternating values, creating asymmetric genome processing. Assign it to Optimizer and see if it helps on Function Approximation.</p>
+  </div>
+</div>
+
+<h4 class="help-subhead">Understanding Convergence</h4>
+<p>When the Best and Avg fitness lines in the History chart both flatten out, the population has <em>converged</em> — most organisms are similar and further improvement is slow. To break out of convergence:</p>
+<div class="help-item-list">
+  <div class="help-item"><p>Increase the global <strong>Mut% Rate</strong> and reset — more mutation = more exploration.</p></div>
+  <div class="help-item"><p>Add more <strong>Mutant</strong> type weight — Mutants are specifically designed to escape local optima via high-entropy disruption.</p></div>
+  <div class="help-item"><p>Create a gene with aggressive random behaviour and assign it to your main type — a single high-entropy gene can restart exploration.</p></div>
+  <div class="help-item"><p>Simply <strong>RESET</strong> and run again — genetic algorithms are stochastic, and a fresh seed sometimes finds a better basin of attraction.</p></div>
+</div>
