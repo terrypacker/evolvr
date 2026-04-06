@@ -558,11 +558,29 @@ function wireEvents() {
   });
 
   dom.deathRateInput().addEventListener('change', (evt) => {
-    state.population.deathRate = Number(evt.target.value) / 100;
+    const rate = Number(evt.target.value);
+    if (rate <= 0) {
+      state.population.deathRate = 0;
+      evt.currentTarget.value = 0;
+    } else if (rate >= 100) {
+      state.population.deathRate = 100;
+      evt.currentTarget.value = 100;
+    } else {
+      state.population.deathRate = rate / 100;
+    }
   });
 
   dom.breedingChanceInput().addEventListener('change', (evt) => {
-    state.population.breedingChance = Number(evt.target.value) / 100;
+    const rate = Number(evt.target.value);
+    if (rate <= 0) {
+      state.population.breedingChance = 0;
+      evt.currentTarget.value = 0;
+    } else if (rate >= 100) {
+      state.population.breedingChance = 100;
+      evt.currentTarget.value = 100;
+    } else {
+      state.population.breedingChance = rate / 100;
+    }
   });
 
   document.getElementById('btnHelp')?.addEventListener('click', openHelp);

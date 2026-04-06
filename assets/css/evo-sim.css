@@ -272,112 +272,119 @@ html, body { height: 100%; overflow: hidden; font-size: 13px; }
   min-width: 26px;
   text-align: right;
 }
+/* ── ORGANISM TYPES PANEL ── */
+.organism-type-weights {
+  padding: 6px 10px;
+  overflow-y: auto;
+  flex: 1
+}
 
 /* ── GENE PANEL ── */
 .gene-list { padding: 6px 10px; }
-.gene-row {
-  padding: 5px 6px;
-  margin-bottom: 2px;
-  background: var(--bg-panel2);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  font-size: 10px;
-}
-.gene-row:hover {
-  background: var(--amber-dim);
-  cursor: pointer; /* Change mouse cursor */
-}
-.gene-row-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.gene-row-desc {
-  font-size: 9px;
-  color: var(--text-muted);
-  line-height: 1.5;
-  margin-top: 3px;
-  font-style: italic;
-}
-.gene-name  { font-family: var(--font-mono); color: var(--text-primary); }
-.gene-types {
-  font-size: 9px;
-  color: var(--text-muted);
-  font-family: var(--font-head);
-  letter-spacing: 0.06em;
-  overflow-x: auto;
-  padding-left: 5px;
-}
+  .gene-row {
+    padding: 5px 6px;
+    margin-bottom: 2px;
+    background: var(--bg-panel2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 10px;
+  }
+  .gene-row:hover {
+    background: var(--amber-dim);
+    cursor: pointer; /* Change mouse cursor */
+  }
+  .gene-row-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .gene-row-desc {
+    font-size: 9px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-top: 3px;
+    font-style: italic;
+  }
+  .gene-name  { font-family: var(--font-mono); color: var(--text-primary); }
+  .gene-types {
+    font-size: 9px;
+    color: var(--text-muted);
+    font-family: var(--font-head);
+    letter-spacing: 0.06em;
+    overflow-x: auto;
+    padding-left: 5px;
+  }
 
-/* ── CONFIG PANEL ── */
-.config-row {
-  display: flex;
-  gap: 8px;
-  padding: 6px 14px;
-  align-items: flex-end;
-}
-.config-item { flex: 1; }
-.config-item label {
-  display: block;
-  font-size: 9px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 4px;
-}
-.config-item input {
-  width: 100%;
-  background: var(--bg-input);
-  border: 1px solid var(--border-hi);
-  border-radius: var(--radius);
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  padding: 4px 6px;
-  outline: none;
-}
-.config-item input:focus { border-color: var(--amber-dim); }
+  /* ── CONFIG PANEL ── */
+  .config-row {
+    display: flex;
+    gap: 8px;
+    padding: 6px 14px;
+    align-items: flex-end;
+  }
+  .config-item { flex: 1; }
+  .config-item label {
+    display: block;
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .config-item input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 4px 6px;
+    outline: none;
+  }
+  .config-item input:focus { border-color: var(--amber-dim); }
 
-/* ── PANEL BADGE VARIANT ── */
-.badge-green {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--green);
-  background: rgba(57, 224, 128, 0.1);
-  border: 1px solid var(--green-dim);
-  padding: 1px 6px;
-  border-radius: 2px;
-}
-.badge-purple {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--purple);
-  background: rgba(160, 128, 255, 0.1);
-  border: 1px solid #604090;
-  padding: 1px 6px;
-  border-radius: 2px;
-}
+  /* ── PANEL BADGE VARIANT ── */
+  .badge-green {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--green);
+    background: rgba(57, 224, 128, 0.1);
+    border: 1px solid var(--green-dim);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+  .badge-purple {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--purple);
+    background: rgba(160, 128, 255, 0.1);
+    border: 1px solid #604090;
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
 
-/* ── SCROLLBARS IN PANELS ── */
-.left-col::-webkit-scrollbar,
-.right-col::-webkit-scrollbar,
-.pop-list-wrap::-webkit-scrollbar,
-.event-log-wrap::-webkit-scrollbar {
-  width: 3px;
-}
+  /* ── SCROLLBARS IN PANELS ── */
+  .left-col::-webkit-scrollbar,
+  .right-col::-webkit-scrollbar,
+  .pop-list-wrap::-webkit-scrollbar,
+  .event-log-wrap::-webkit-scrollbar {
+    width: 3px;
+  }
 
-/* ── BOTTOM STATUS BAR ── */
-#statusBar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 4px 16px;
-  background: var(--bg-panel);
-  border-top: 1px solid var(--border);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--text-muted);
-  letter-spacing: 0.06em;
-  flex-shrink: 0;
+  /* ── BOTTOM STATUS BAR ── */
+  #statusBar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 16px;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    flex-shrink: 0;
+  }
+  #statusBar span { color: var(--text-dim); }
 }
-#statusBar span { color: var(--text-dim); }

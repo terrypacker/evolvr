@@ -198,7 +198,7 @@ export class Population {
     this.mutationRate   = config.mutationRate   ?? 0.1;
     this.mutationScale  = config.mutationScale  ?? 0.2;
     this.typeWeights    = config.typeWeights    ?? {};  // {typeId: weight 0-1}
-    this.deathRate      = config.deathRate      ?? 0.1;
+    this.deathRate      = config.deathRate      ?? 0.2;
     this.breedingChance = config.breedingChance ?? 0.5;
 
     this.organisms      = [];
@@ -260,8 +260,9 @@ export class Population {
     // Sort by fitness descending
     this.organisms.sort((a, b) => b.fitness - a.fitness);
 
-    //Trim population to max size, kill off the least fit
-    this.organisms = this.organisms.slice(0, this.maxSize - (this.maxSize * this.deathRate));
+    //Trim population to max size, kill off the least fit, always keep 1
+    const maxDead = Math.min(this.maxSize - 1, this.maxSize * this.deathRate);
+    this.organisms = this.organisms.slice(0, this.maxSize - maxDead);
 
     const best = this.organisms[0];
     const avg  = this.organisms.reduce((s, o) => s + o.fitness, 0) / this.organisms.length;

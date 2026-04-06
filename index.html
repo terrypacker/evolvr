@@ -119,19 +119,22 @@
           <div class="config-row">
             <div class="config-item">
               <label>Breeding % rate</label>
-              <input type="number" id="breedingChanceInput" value="10" min="0" max="100">
+              <input type="number" id="breedingChanceInput" value="20" min="0" max="100">
               <div class="gene-pool-note">% of population selected to breed every generation</div>
             </div>
           </div>
-          <div class="divider" style="margin:0 14px"></div>
-          <div class="panel-body-compact">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-              <label class="field-label" style="margin:0">ORGANISM TYPES</label>
-              <button class="btn btn-sm" id="btnEditTypes">✎ EDIT TYPES</button>
-            </div>
-            <div id="typeWeightControls"></div>
-          </div>
         </div>
+      </div>
+
+      <!-- Organism Types -->
+      <div class="panel" style="flex:0.5;min-height:0">
+        <div class="panel-header">
+          <span class="panel-tag">OT</span>
+          <span class="panel-title">ORGANISM TYPES</span>
+          <span class="badge-purple" id="organismTypesBadge">4 types</span>
+          <button class="btn btn-xs" id="btnEditTypes">✎ EDIT TYPES</button>
+        </div>
+        <div class="organism-type-weights" id="typeWeightControls"></div>
       </div>
 
       <!-- Gene Registry -->
