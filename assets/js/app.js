@@ -173,12 +173,19 @@ function buildProblemSettings() {
     const label = document.createElement('label');
     label.textContent = p.label;
     label.classList.add('field-label');
+
     const input = document.createElement('input');
     input.value = p.value;
     input.id = 'problem-setting-' + p.id;
     input.classList.add('field-input');
+
+    const note = document.createElement('div');
+    note.classList.add('gene-pool-note');
+    note.textContent = p.description;
+
     paramsDiv.appendChild(label);
-    paramsDiv.appendChild(input)
+    paramsDiv.appendChild(input);
+    paramsDiv.appendChild(note);
   }
 }
 

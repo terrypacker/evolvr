@@ -42,14 +42,25 @@ const PeakFinder = {
   goalLabel: 'Target peak height (0–1)',
   params: { peaks: null },  // generated on first use
   settings: [
-    { id: 'numPeaks', label: 'Peaks to generate', value: 42 }
+    {
+      id: 'numPeaks',
+      label: 'Peaks to generate',
+      description: 'The number of peaks to place in the solution space.',
+      value: 7
+    },
+    {
+      id: 'seed',
+      label: 'Seed heights',
+      description: 'Seed to help randomly generate heights.',
+      value: 42
+    }
   ],
 
-  _generatePeaks(seed = 42) {
+  _generatePeaks(numPeaks, seed = 42) {
     const peaks = [];
     let rng = seed;
     const rand = () => { rng = (rng * 1664525 + 1013904223) & 0xffffffff; return (rng >>> 0) / 0xffffffff; };
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < numPeaks; i++) {
       peaks.push({ x: rand(), y: rand(), h: 0.3 + rand() * 0.7, w: 0.05 + rand() * 0.15 });
     }
     return peaks;
@@ -153,9 +164,15 @@ const FunctionApprox = {
   label: 'Function Approximation',
   description: 'Evolve a polynomial whose genome encodes coefficients. Fitness is how closely it matches a target function over [0,1].',
   goalLabel: 'Max MSE error (lower = harder)',
+  goalDesc: '',
   params: { samples: 20 },
   settings: [
-    { id: 'targetFn', label: 'Target function', value: 'return Math.sin(x * Math.PI * 2) * 0.5 + 0.5' }
+    {
+      id: 'targetFn',
+      label: 'Target function',
+      description: 'The function to evaluate the solutions against, this must return a y value for each x supplied.',
+      value: 'return Math.sin(x * Math.PI * 2) * 0.5 + 0.5'
+    }
   ],
 
   _targetFn: (x) => {
@@ -263,8 +280,18 @@ const Knapsack = {
   goalLabel: 'Target value ratio (0–1)',
   params: { items: null, capacity: 0.5 },
   settings: [
-    { id: 'numItems', label: 'Number of items', value: 12 },
-    { id: 'seed', label: 'Seed for weight and value', value: 99}
+    {
+      id: 'numItems',
+      label: 'Number of items',
+      description: 'The number of items that are available to fill the Knapsack.',
+      value: 12
+    },
+    {
+      id: 'seed',
+      label: 'Seed for weight and value',
+      description: 'Allows you to vary the weights and values of the items.',
+      value: 99
+    }
   ],
 
   _generateItems(n = 12, seed = 99) {
@@ -417,8 +444,18 @@ const TSP = {
   goalLabel: 'Max tour length (lower = better)',
   params: { cities: null },
   settings: [
-    { id: 'cities', label: 'Number of cities', value: 10 },
-    { id: 'seed', label: 'Seed distances', value: 7}
+    {
+      id: 'cities',
+      label: 'Number of cities',
+      description: 'The number of cities in the solution space.',
+      value: 10
+    },
+    {
+      id: 'seed',
+      label: 'Seed distances',
+      description: 'The seed used to randomly generated the distances between cities.',
+      value: 7
+    }
   ],
   _generateCities(n = 10, seed = 7) {
     let rng = seed;
