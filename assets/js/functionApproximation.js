@@ -88,10 +88,10 @@ class FunctionApproximation extends Problem {
       }
     }
 
-    // Labels
-    ctx.fillStyle   = '#3a4258';
-    ctx.font        = '9px monospace';
-    ctx.fillText('TARGET (amber) vs POPULATION CURVES', pad, pad - 6);
+    this.drawColoredText(ctx, [
+      { text: 'TARGET', color: '#f0a50060' },
+      { text: ' vs POPULATION', color: '#929db9' }
+    ], pad, H - (pad/2));
   }
 
 }

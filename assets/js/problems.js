@@ -54,6 +54,14 @@ export class Problem {
     // Use the live registry so custom types get their configured colour.
     return OrganismTypes.get(typeId)?.color ?? '#6a7590';
   }
+
+  drawColoredText(ctx, segments, x, y) {
+    segments.forEach(seg => {
+      ctx.fillStyle = seg.color;
+      ctx.fillText(seg.text, x, y);
+      x += ctx.measureText(seg.text).width;
+    });
+  }
 }
 
 /* ── EXPORT ALL PROBLEMS ─────────────────────────────────────── */

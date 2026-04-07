@@ -135,9 +135,14 @@ class BinaryKnapsack  extends Problem {
     ctx.setLineDash([]);
 
     // Legend
-    ctx.fillStyle = '#3a4258';
-    ctx.font = '9px monospace';
-    ctx.fillText('▌ WEIGHT  ▌ VALUE   ── CAPACITY', pad, pad - 4);
+    this.drawColoredText(ctx, [
+      { text: '▌', color: '#2e3a5060' },
+      { text: ' WEIGHT  ', color: '#929db9' },
+      { text: '▌', color: '#f0a50038' },
+      { text: ' VALUE   ', color: '#929db9' },
+      { text: '---', color:'#ff445570' },
+      { text: ' CAPACITY', color: '#929db9'}
+    ], pad, H - pad);
   }
 }
 export const KS = new BinaryKnapsack({
