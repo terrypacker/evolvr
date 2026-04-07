@@ -4,6 +4,10 @@
 
 import { Population, OrganismTypes, GeneRegistry } from './engine.js';
 import { Problems } from './problems.js';
+import { PF } from './peakFinder.js';
+import { KS } from './binaryKnapsack.js';
+import { FA } from './functionApproximation.js';
+import { TSP } from './travelingSalesman.js';
 import {
   openOrganismList,
   openGeneList,
@@ -12,6 +16,9 @@ import {
   openOrganismEditor
 } from './modals.js';
 import { openHelp } from './help.js';
+
+/* ── PROBLEM TYPE DEFINITIONS ──────────────────────────────── */
+Problems.push(PF, FA, KS, TSP);
 
 /* ── ORGANISM TYPE DEFINITIONS ──────────────────────────────── */
 OrganismTypes.register({
