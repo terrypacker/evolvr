@@ -118,6 +118,7 @@ class PeakFinder extends Problem {
     }
   }
 }
+
 export const PF = new PeakFinder({
   id: 'peakFinder',
   label: 'Peak Finder',

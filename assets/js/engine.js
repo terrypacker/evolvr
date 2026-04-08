@@ -22,38 +22,8 @@
    Handles: organism lifecycle, gene expression, reproduction,
             fitness evaluation, and population management.
    ============================================================= */
-
 'use strict';
-
-/* ── GENE REGISTRY ────────────────────────────────────────────
-   Each gene is a named function that belongs to one or more
-   organism types. Genes are the "skills" available to an
-   organism type. They operate on the organism's genome array.
-
-   To add a new gene:
-     GeneRegistry.register('myGene', ['TypeA', 'TypeB'], function(genome, params) {
-       // mutate or return a value
-       return modifiedValue;
-     });
-   ============================================================= */
-export const GeneRegistry = (() => {
-  const _genes = new Map();
-
-  const api = {
-    register(name, types, fn, description = '') {
-      _genes.set(name, { name, types, fn, description });
-    },
-    delete(name) { _genes.delete(name); },
-    get(name) { return _genes.get(name); },
-    forType(type) {
-      return [..._genes.values()].filter(g => g.types.includes(type));
-    },
-    allNames() { return [..._genes.keys()]; },
-    all() { return [..._genes.values()]; },
-    get _genes() { return _genes; }
-  };
-  return api;
-})();
+import { GeneRegistry } from './genes.js';
 
 /* ── ORGANISM TYPE REGISTRY ───────────────────────────────────
    Define organism types with their associated gene pools.

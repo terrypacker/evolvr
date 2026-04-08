@@ -21,8 +21,10 @@
    MODALS.JS  —  Organism Type Editor & Gene Editor Modals
    ============================================================= */
 
-import {OrganismTypes, GeneRegistry, Population} from './engine.js';
-import {state} from './app.js';
+import { OrganismTypes, Population } from './engine.js';
+import { Gene, GeneRegistry } from './genes.js';
+
+import { state } from './app.js';
 /* ── COLOUR PALETTE ── */
 const PALETTE = [
   '#f0a500','#00d4e8','#39e080','#a080ff',
@@ -573,7 +575,13 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
     }
 
     const typeList = [...selectedTypes];
-    GeneRegistry.register(name, typeList, fn, desc);
+    const newGene = new Gene({
+      name: name,
+      types: typeList,
+      fn: fn,
+      description: desc
+    });
+    GeneRegistry.register(newGene);
 
     /* Auto-add to gene pool of selected types (new genes only) */
     if (!isEdit) {
