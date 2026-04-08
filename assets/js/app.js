@@ -85,6 +85,8 @@ export const state = {
   mutScale:     20,
   eliteCount:   3,
   deathRate:    0.1,
+  breedingChance: 0.1,
+  sameFitnessRandomness: 0.5
 };
 
 /* ── DOM REFS ──────────────────────────────────────────────── */
@@ -117,7 +119,12 @@ const dom = {
   mutScaleInput: () => $('mutScaleInput'),
   eliteCountInput: () => $('eliteCountInput'),
   deathRateInput: () => $('deathRateInput'),
+  deathRateText: () => $('deathRateText'),
   breedingChanceInput: () => $('breedingChanceInput'),
+  breedingChanceText: () => $('breedingChanceText'),
+  sameFitnessRandomnessInput: () => $('sameFitnessRandomnessInput'),
+  sameFitnessRandomnessText: () => $('sameFitnessRandomnessText'),
+
   problemSettings: () => $('problemSettings'),
   problemRegenerateButton: () => $('problemRegenerateButton')
 };
@@ -285,6 +292,7 @@ function resetSim() {
     eliteCount:    +dom.eliteCountInput().value || state.eliteCount,
     deathRate: (+dom.deathRateInput().value || state.deathRate) / 100,
     breedingChance: (+dom.breedingChanceInput().value || state.breedingChance) / 100,
+    sameFitnessRandomness: (+dom.sameFitnessRandomnessInput().value || state.sameFitnessRandomness) / 100,
   });
   pop.setProblem(state.problem);
 
@@ -602,6 +610,7 @@ function wireEvents() {
     } else {
       state.population.deathRate = rate / 100;
     }
+    dom.deathRateText().innerHTML = (state.population.deathRate * 100).toFixed(2) + ' %';
   });
 
   dom.breedingChanceInput().addEventListener('change', (evt) => {
@@ -615,6 +624,21 @@ function wireEvents() {
     } else {
       state.population.breedingChance = rate / 100;
     }
+    dom.breedingChanceText().innerHTML = (state.population.breedingChance * 100).toFixed(2) + ' %';
+  });
+
+  dom.sameFitnessRandomnessInput().addEventListener('change', (evt) => {
+    const rate = Number(evt.target.value);
+    if (rate <= 0) {
+      state.population.sameFitnessRandomness = 0;
+      evt.currentTarget.value = 0;
+    } else if (rate >= 100) {
+      state.population.sameFitnessRandomness = 100;
+      evt.currentTarget.value = 100;
+    } else {
+      state.population.sameFitnessRandomness = rate / 100;
+    }
+    dom.sameFitnessRandomnessText().innerHTML = (state.population.sameFitnessRandomness * 100).toFixed(2) + ' %';
   });
 
   document.getElementById('btnHelp')?.addEventListener('click', openHelp);

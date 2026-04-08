@@ -189,6 +189,7 @@ export class Population {
     this.typeWeights    = config.typeWeights    ?? {};  // {typeId: weight 0-1}
     this.deathRate      = config.deathRate      ?? 0.2;
     this.breedingChance = config.breedingChance ?? 0.5;
+    this.sameFitnessRandomness = config.sameFitnessRandomness ?? .5;
 
     this.organisms      = [];
     this.generation     = 0;
@@ -246,12 +247,13 @@ export class Population {
   evolve() {
     this.evaluate();
 
-    // Sort by fitness descending
-    this.organisms.sort((a, b) => b.fitness - a.fitness);
-
+    // Sort by fitness descending,
+    // first we will sort into groups of the same fitness, then randomize those groups
+    // then proceed to evolve.  This prevents a steady state stagnation of a population
+    // that has the same fitness
     //Trim population to max size, kill off the least fit, always keep 1
     const maxDead = Math.min(this.maxSize - 1, this.maxSize * this.deathRate);
-    this.organisms = this.organisms.slice(0, this.maxSize - maxDead);
+    this.organisms = this._groupAndSelect(this.organisms, this.maxSize - maxDead, this.sameFitnessRandomness)
 
     const best = this.organisms[0];
     const avg  = this.organisms.reduce((s, o) => s + o.fitness, 0) / this.organisms.length;
@@ -295,6 +297,94 @@ export class Population {
     if (this.generation % 10 === 0) {
       this._addEvent(`Gen ${this.generation}: pop ${this.organisms.length}, avg fitness ${avg.toFixed(4)}`);
     }
+  }
+
+  /* evolution helpers */
+
+  /**
+   * Shuffle the array randomly
+   * @param array - array to randomize
+   * @param randomness - 0: No shuffling (deterministic, original order preserved) .5: Midrange mixing 1: Full shuffle (classic Fisher–Yates)
+   * @returns {*[]}
+   * @private
+   */
+  _controlledShuffle(array, randomness = 1) {
+    const arr = [...array];
+
+    // 0 = no shuffle, 1 = full shuffle
+    if (randomness <= 0) return arr;
+
+    for (let i = arr.length - 1; i > 0; i--) {
+      // Only shuffle this position based on randomness probability
+      if (Math.random() < randomness) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    return arr;
+  }
+
+  /**
+   *
+   * @param items
+   * @param randomness - 0: No shuffling (deterministic, original order preserved) .5: Midrange mixing 1: Full shuffle (classic Fisher–Yates)
+   * @returns {{fitness: *, items: *[]}[]}
+   * @private
+   */
+  _groupByFitness(organisms, randomness = 1) {
+    const groupsMap = new Map();
+
+    // Grouping
+    for (const item of organisms) {
+      const key = item.fitness;
+      if (!groupsMap.has(key)) {
+        groupsMap.set(key, []);
+      }
+      groupsMap.get(key).push(item);
+    }
+
+    // Sort groups descending + shuffle within groups
+    return Array.from(groupsMap.entries())
+    .sort((a, b) => b[0] - a[0])
+    .map(([fitness, group]) => ({
+      fitness,
+      items: this._controlledShuffle(group, randomness)
+    }));
+  }
+
+  /**
+   * Select the top size items from the array into a new array
+   * @param groups
+   * @param size
+   * @returns {*[]}
+   * @private
+   */
+  _selectFromGroups(groups, size) {
+    const result = [];
+
+    for (const group of groups) {
+      for (const item of group.items) {
+        if (result.length >= size) return result;
+        result.push(item);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Produce a group of organisms that has random order of similar fitness
+   * that can be smaller than the original group.
+   * @param organisms - organisms to groups, randomize the organsims in the
+   * group and slice it to size.
+   * @param size - final size of organisms list
+   * @param randomness - level of randomness [0 = none, 1 = fully randomized]
+   * @returns {*}
+   * @private
+   */
+  _groupAndSelect(organisms, size, randomness = 1) {
+    const groups = this._groupByFitness(organisms, randomness);
+    return this._selectFromGroups(groups, size);
   }
 
   _addEvent(msg) {
