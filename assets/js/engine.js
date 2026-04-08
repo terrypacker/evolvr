@@ -247,34 +247,37 @@ export class Population {
   evolve() {
     this.evaluate();
 
-    // Sort by fitness descending,
+    //Compute average fitness of this generation
+    const avg  = this.organisms.reduce((s, o) => s + o.fitness, 0) / this.organisms.length;
+
+    // Sort by fitness descending and remove Elite survivors to carry over
+    this.organisms = this.organisms.sort((a, b) => b.fitness - a.fitness);
+    const elites  = this.organisms.slice(0, this.eliteCount);
+    this.organisms = this.organisms.slice(this.eliteCount, this.organisms.length);
+
     // first we will sort into groups of the same fitness, then randomize those groups
     // then proceed to evolve.  This prevents a steady state stagnation of a population
     // that has the same fitness
-    //Trim population to max size, kill off the least fit, always keep 1
+    // Trim population to max size, kill off the least fit, always keep 1
     const maxDead = Math.min(this.maxSize - 1, this.maxSize * this.deathRate);
     this.organisms = this._groupAndSelect(this.organisms, this.maxSize - maxDead, this.sameFitnessRandomness)
 
-    const best = this.organisms[0];
-    const avg  = this.organisms.reduce((s, o) => s + o.fitness, 0) / this.organisms.length;
+    // Setup next generation and select the parents that will breed, ensure there are at least 2
+    const nextGen = [...elites, ...this.organisms];
+    const parents = nextGen.slice(0, Math.max(2, Math.ceil(this.organisms.length * this.breedingChance)));
 
-    if (!this.bestOrganism || best.fitness > this.bestFitness) {
+    //Find the best surviving organism, make sure its still alive!
+    const best = nextGen[0];
+    if (!this.bestOrganism || best.fitness > this.bestFitness || (best.fitness == this.bestFitness && best.id != this.bestOrganism.id)) {
       this.bestFitness  = best.fitness;
       this.bestOrganism = best;
       this._addEvent(`New best: Org #${best.id} (${best.type}) fitness ${best.fitness.toFixed(4)}`);
     }
 
+    // Document this generation
     this.history.push({ gen: this.generation, best: best.fitness, avg, size: this.organisms.length });
     if (this.history.length > 200) this.history.shift();
 
-    // Elite survivors carry over
-    const elites  = this.organisms.slice(0, this.eliteCount);
-
-    //Select parents to carry over, remaining population dies and gets replaced with children
-    const parents = this.organisms.slice(0, Math.ceil(this.organisms.length * this.breedingChance));
-
-    //Retain the elites and parents
-    const nextGen = [...elites, ...parents.slice(this.eliteCount, parents.length)];
 
     //Provide a chance for mating
     const mateChances = this.maxSize - nextGen.length;

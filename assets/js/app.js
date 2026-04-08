@@ -421,6 +421,7 @@ function updatePopList(organisms, best) {
         const type = OrganismTypes.get(org.type);
         const col = type?.color ?? '#6a7590';
         const isBest = org === best;
+
         const popRow = document.createElement('div');
         popRow.classList.add('pop-row');
         if (isBest) popRow.classList.add('pop-row-best');
@@ -428,6 +429,7 @@ function updatePopList(organisms, best) {
         popRow.addEventListener('click', (evt) => {
           openOrganismEditor(Number(evt.currentTarget.dataset.orgId), evt,() => updatePopList(state.population.organisms, state.population.bestOrganism))
         });
+
         //ID Column
         const idColumn = document.createElement('span');
         idColumn.classList.add('pop-id');
@@ -435,27 +437,27 @@ function updatePopList(organisms, best) {
         idColumn.innerText = '#' + org.id;
         popRow.appendChild(idColumn);
 
-        //ID Column
+        //TYPE Column
         const typeColumn = document.createElement('span');
         typeColumn.classList.add('pop-type');
         typeColumn.style = 'color:' + col;
         typeColumn.innerText = type?.label ?? org.type
         popRow.appendChild(typeColumn);
 
-        //ID Column
+        //FITNESS Column
         const fitnessColumn = document.createElement('span');
         fitnessColumn.classList.add('pop-fitness');
         fitnessColumn.innerText = org.fitness.toFixed(4)
         popRow.appendChild(fitnessColumn);
 
-        //ID Column
+        //AGE Column
         const ageColumn = document.createElement('span');
         ageColumn.classList.add('pop-age');
         ageColumn.style = `color:${col}`
         ageColumn.innerText = `${org.age}g`;
         popRow.appendChild(ageColumn);
 
-        //ID Column
+        //GENOME Column
         const genomeColumn = document.createElement('div');
         genomeColumn.classList.add('pop-genome-bar');
         const genomeBar = document.createElement('div');
@@ -605,7 +607,7 @@ function wireEvents() {
       state.population.deathRate = 0;
       evt.currentTarget.value = 0;
     } else if (rate >= 100) {
-      state.population.deathRate = 100;
+      state.population.deathRate = 1;
       evt.currentTarget.value = 100;
     } else {
       state.population.deathRate = rate / 100;
@@ -619,7 +621,7 @@ function wireEvents() {
       state.population.breedingChance = 0;
       evt.currentTarget.value = 0;
     } else if (rate >= 100) {
-      state.population.breedingChance = 100;
+      state.population.breedingChance = 1;
       evt.currentTarget.value = 100;
     } else {
       state.population.breedingChance = rate / 100;
@@ -633,7 +635,7 @@ function wireEvents() {
       state.population.sameFitnessRandomness = 0;
       evt.currentTarget.value = 0;
     } else if (rate >= 100) {
-      state.population.sameFitnessRandomness = 100;
+      state.population.sameFitnessRandomness = 1;
       evt.currentTarget.value = 100;
     } else {
       state.population.sameFitnessRandomness = rate / 100;
