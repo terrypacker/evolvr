@@ -53,8 +53,15 @@ class BinaryKnapsack  extends Problem {
       }
     }
 
-    if (totalW > capacity) return Math.max(0, 1 - (totalW - capacity) * 2);
-    return totalV / maxV;
+    if(totalW > capacity) {
+      // Over capacity: Linear penalty + cap at 0
+      // Math.max(0, ...) ensures fitness doesn't become negative
+      // The '* 2' means if you are 50% over capacity, fitness is 0.
+      let overCapacityPercentage = (totalW - capacity) / capacity;
+      return Math.max(0, 1 - (overCapacityPercentage * 2));
+    }else {
+      return totalV / maxV;
+    }
   }
 
   visualize(canvas, population, goal) {
@@ -109,6 +116,17 @@ class BinaryKnapsack  extends Problem {
       }
     }
 
+    // Capacity line
+    const capY = pad + innerH - capacity * innerH;
+    ctx.beginPath();
+    ctx.strokeStyle = '#ff445570';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.moveTo(pad, capY);
+    ctx.lineTo(W - pad, capY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
     // Running total weight bar across the bottom showing how full the knapsack is
     if (population?.bestOrganism) {
       const org = population.bestOrganism;
@@ -116,7 +134,7 @@ class BinaryKnapsack  extends Problem {
       let totalW = 0, totalV = 0;
       const maxV = items.reduce((s, it) => s + it.value, 0);
       for (let i = 0; i < n; i++) {
-        if ((ex[i] ?? org.genome[i] ?? 0) > 0.5) {
+        if ((ex[i] ?? org.genome[i]?.value ?? 0) > 0.5) {
           totalW += items[i].weight;
           totalV += items[i].value;
         }
@@ -130,27 +148,22 @@ class BinaryKnapsack  extends Problem {
       ctx.fillStyle = overCapacity ? '#ff4455cc' : '#00d4e8cc';
       ctx.fillRect(pad, H - pad - 8, fillW, 6);
 
-      // Labels
-      ctx.fillStyle = overCapacity ? '#ff4455' : '#6a7590';
-      ctx.font = '9px monospace';
-      const wLabel = 'W:' + totalW.toFixed(2) + '/' + capacity.toFixed(2);
-      const vLabel = '  V:' + totalV.toFixed(2) + '/' + maxV.toFixed(2);
-      const label  = overCapacity
-          ? 'OVER CAPACITY  ' + wLabel
-          : wLabel + vLabel;
-      ctx.fillText(label, pad, H - pad - 12);
-    }
+      // Over Capacity warning
+      const wLabel = 'W: ' + totalW.toFixed(2) + ' / ' + capacity.toFixed(2);
+      const vLabel = '  V: ' + totalV.toFixed(2) + ' / ' + maxV.toFixed(2);
 
-    // Capacity line
-    const capY = pad + innerH - capacity * innerH;
-    ctx.beginPath();
-    ctx.strokeStyle = '#ff445570';
-    ctx.lineWidth   = 1;
-    ctx.setLineDash([4, 4]);
-    ctx.moveTo(pad, capY);
-    ctx.lineTo(W - pad, capY);
-    ctx.stroke();
-    ctx.setLineDash([]);
+      if(overCapacity) {
+        this.drawColoredText(ctx, [
+          { text: 'OVER CAPACITY WEIGHT ' + wLabel, color: '#ff4455' },
+          { text: vLabel, color: '#6a7590'}
+        ], pad, capY - pad)
+      }else {
+        this.drawColoredText(ctx, [
+          { text: wLabel, color: '#6a7590' },
+          { text: vLabel, color: '#6a7590'}
+        ], pad, capY - pad)
+      }
+    }
 
     // Legend
     this.drawColoredText(ctx, [
@@ -160,7 +173,7 @@ class BinaryKnapsack  extends Problem {
       { text: ' VALUE   ', color: '#929db9' },
       { text: '---', color:'#ff445570' },
       { text: ' CAPACITY', color: '#929db9'}
-    ], pad, H - pad);
+    ], pad, H - pad/2);
   }
 }
 export const KS = new BinaryKnapsack({
