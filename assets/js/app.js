@@ -428,12 +428,17 @@ function updatePopList(organisms, best) {
     .sort((a, b) => b.fitness - a.fitness)
     .slice(0,20)
     .filter(item => item !== null);
+
+  const maxGenomeLength = organisms.reduce((max, obj) =>
+      (obj.genome.length > max.genome.length) ? obj : max
+  ).genome.length;
+
   el.replaceChildren();
 
   sorted.map(org => {
         const type = OrganismTypes.get(org.type);
         const col = type?.color ?? '#6a7590';
-        const isBest = org === best;
+        const isBest = org.id === best?.id;
 
         const popRow = document.createElement('div');
         popRow.classList.add('pop-row');
@@ -475,7 +480,7 @@ function updatePopList(organisms, best) {
         genomeColumn.classList.add('pop-genome-bar');
         const genomeBar = document.createElement('div');
         genomeBar.classList.add('pop-genome-fill');
-        genomeBar.style = `width:${org.fitness*100}%;background:${col}44;border-right:2px solid ${col}`
+        genomeBar.style = `width:${(org.genome.length/maxGenomeLength)*100}%;background:${col}44;border-right:2px solid ${col}`
         genomeColumn.appendChild(genomeBar);
         popRow.appendChild(genomeColumn);
 
