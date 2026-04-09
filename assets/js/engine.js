@@ -255,10 +255,12 @@ export class Population {
     const elites  = this.organisms.slice(0, this.eliteCount);
     this.organisms = this.organisms.slice(this.eliteCount, this.organisms.length);
 
-    // first we will sort into groups of the same fitness, then randomize those groups
-    // then proceed to evolve.  This prevents a steady state stagnation of a population
-    // that has the same fitness
     // Trim population to max size, kill off the least fit, always keep 1
+    //
+    // Sort into groups of the same fitness, randomize those groups.
+    // This prevents a steady state stagnation of a population that has the same fitness.
+    // Kill off the lowest % of organisms.
+    //
     const maxDead = Math.min(this.maxSize - 1, this.maxSize * this.deathRate);
     this.organisms = this._groupAndSelect(this.organisms, this.maxSize - maxDead, this.sameFitnessRandomness)
 

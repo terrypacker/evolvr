@@ -43,22 +43,29 @@
   </div>
 </div>
 
+<h2 class="help-concept-label">Problem Stages</h2>
 <div class="help-flow">
   <div class="help-flow-step">Seed<br><span>random genomes</span></div>
   <div class="help-flow-arrow">→</div>
+  <div class="help-flow-step">Evolve<br><span>evolve population</span></div>
+</div>
+
+<h2 class="help-concept-label">Stages of Evolution</h2>
+<div class="help-flow">
   <div class="help-flow-step">Express<br><span>apply genes</span></div>
   <div class="help-flow-arrow">→</div>
   <div class="help-flow-step">Evaluate<br><span>score fitness</span></div>
   <div class="help-flow-arrow">→</div>
-  <div class="help-flow-step">Death<br><span>remove lowest fit organisms</span></div>
+  <div class="help-flow-step">Elites<br><span>keep elite</span></div>
   <div class="help-flow-arrow">→</div>
-  <div class="help-flow-step">Select Elites<br><span>keep elite</span></div>
+  <div class="help-flow-step">Death<br><span>unfit die</span></div>
   <div class="help-flow-arrow">→</div>
-  <div class="help-flow-step">Select Parents<br><span>keep parents</span></div>
+  <div class="help-flow-step">Parents<br><span>keep parents</span></div>
   <div class="help-flow-arrow">→</div>
-  <div class="help-flow-step">Reproduce<br><span>crossover + mutate up to max population</span></div>
+  <div class="help-flow-step">Breed<br><span>breed parents</span></div>
   <div class="help-flow-arrow">↻</div>
 </div>
+
 <div class="help-tip">
   <span class="help-tip-icon">🔧</span>
   <span>Adjusting the values on the <strong>⚙ CFG - Parameters Panel</strong> allows exploring population convergence.</span>
