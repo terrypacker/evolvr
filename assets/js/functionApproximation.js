@@ -254,7 +254,7 @@ class FunctionApproximation extends Problem {
         const alpha = 0.15 + org.fitness * 0.5;
         ctx.beginPath();
         ctx.strokeStyle = col + Math.floor(alpha * 255).toString(16).padStart(2, '0');
-        ctx.lineWidth = org === population.bestOrganism ? 5 : 1;
+        ctx.lineWidth = org.id === population.bestOrganism?.id ? 5 : 1;
 
         for (let px = 0; px <= iW; px++) {
           const x   = px / iW;
