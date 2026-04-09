@@ -159,12 +159,12 @@ export class Organism {
     }
 
     if(maybeAddGene) {
-      if (Math.random() < mutationRate * 0.5) {
+      if (Math.random() < mutationRate * 50) {
         childGenes.push(new Gene(GeneRegistry.nextGeneId(), Math.random()));
       }
     }else {
       //Min length of genes is set here to 2
-      if (childGenes.length > 2 && Math.random() < mutationRate * 0.5) {
+      if (childGenes.length > 2 && Math.random() < mutationRate * 50) {
         childGenes.splice(Math.floor(Math.random() * childGenes.length), 1);
       }
     }
@@ -445,15 +445,15 @@ export class Population {
     // Kill off the lowest % of organisms.
     //
     const maxDead = Math.min(this.maxSize - 1, this.maxSize * this.deathRate);
-    this.organisms = this._groupAndSelect(this.organisms, this.maxSize - maxDead, this.sameFitnessRandomness)
+    const selected = this._groupAndSelect(this.organisms, this.maxSize - maxDead, this.sameFitnessRandomness)
 
     // Setup next generation and select the parents that will breed, ensure there are at least 2
-    const nextGen = [...elites, ...this.organisms];
-    const parents = nextGen.slice(0, Math.max(2, Math.ceil(this.organisms.length * this.breedingChance)));
+    const nextGen = [...elites, ...selected];
+    const parents = nextGen.slice(0, Math.max(2, Math.ceil(selected.length * this.breedingChance)));
 
     //Find the best surviving organism, make sure its still alive!
     const best = nextGen[0];
-    if (!this.bestOrganism || best.fitness > this.bestFitness || (best.fitness == this.bestFitness && best.id != this.bestOrganism.id)) {
+    if (!this.bestOrganism || best.fitness > this.bestFitness || (best.id != this.bestOrganism.id)) {
       this.bestFitness  = best.fitness;
       this.bestOrganism = best;
       this._addEvent(`New best: Org #${best.id} (${best.type}) fitness ${best.fitness.toFixed(4)}`);
@@ -463,6 +463,10 @@ export class Population {
     this.history.push({ gen: this.generation, best: best.fitness, avg, size: this.organisms.length });
     if (this.history.length > 200) this.history.shift();
 
+    // Occasionally note an interesting event
+    if (this.generation % 10 === 0) {
+      this._addEvent(`Gen ${this.generation}: pop ${this.organisms.length}, avg fitness ${avg.toFixed(4)}`);
+    }
 
     //Provide a chance for mating
     const mateChances = this.maxSize - nextGen.length;
@@ -480,11 +484,6 @@ export class Population {
 
     this.organisms  = nextGen;
     this.generation++;
-
-    // Occasionally note an interesting event
-    if (this.generation % 10 === 0) {
-      this._addEvent(`Gen ${this.generation}: pop ${this.organisms.length}, avg fitness ${avg.toFixed(4)}`);
-    }
   }
 
   /* evolution helpers */
