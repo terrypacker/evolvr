@@ -208,10 +208,23 @@ function buildProblemSettings() {
     label.textContent = p.label;
     label.classList.add('field-label');
 
-    const input = document.createElement('input');
-    input.value = p.value;
+    let input;
+    if(p.selectValues) {
+      input = document.createElement('select');
+      const fragment = document.createDocumentFragment();
+      p.selectValues.forEach(sv => {
+        const opt = new Option(sv.label, sv.id);
+        fragment.appendChild(opt);
+      });
+      input.appendChild(fragment);
+      input.classList.add('field-select');
+    }else {
+      input = document.createElement('input');
+      input.classList.add('field-input');
+    }
+
     input.id = 'problem-setting-' + p.id;
-    input.classList.add('field-input');
+    input.value = p.value;
 
     const note = document.createElement('div');
     note.classList.add('gene-pool-note');

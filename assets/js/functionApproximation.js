@@ -27,13 +27,18 @@ class FunctionApproximation extends Problem {
       return Math.sin(x * Math.PI * 2) * 0.5 + 0.5
       //return x + 0.2 * Math.pow(x,2) + 0.3 * Math.pow(x,3) + 0.4 * Math.pow(x,4)
     };
-    this.mode = 'MSE'; //['MSE','POLYFIT'];
+    this.predictionMode = 'COEFFICIENTS'; //['COEFFICIENTS','POLYFIT'];
+    this.fitnessMode = 'MSE'; //['MSE', 'SMOOTH']
+    this.yTrue = [];
+    this.xTrue = [];
     this._generateFit();
   }
 
+  /**
+   * Evaluate the polynomial over the X values
+   * @private
+   */
   _generateFit() {
-    this.yTrue = [];
-    this.xTrue = [];
     const n   = this.params.samples;
     for (let i = 0; i < n; i++) {
       const x    = i / (n - 1);
@@ -43,16 +48,81 @@ class FunctionApproximation extends Problem {
     }
   }
 
+  regenerate(args) {
+    this._targetFn = new Function("x", args[0]);
+    this._generateFit();
+  }
+
+  evaluate(genome, expressed, organism) {
+    //Compute coefficients
+    let coefficients = this._computeCoefficients(expressed);
+
+    const yPred = [];
+    for (let i = 0; i < this.xTrue.length; i++) {
+      const x = this.xTrue[i];
+      const pred = this._evaluatePolynomial(coefficients, x);
+      yPred.push(pred);
+    }
+
+    //Evaluate fitness of prediction
+    if(this.fitnessMode === 'MSE') {
+      return this._polynomialFitness(yPred);
+    }else if(this.fitnessMode === 'SMOOTH') {
+      return this._smoothFitness(yPred);
+    }else {
+      throw new Error('Unknown fitness mode ' + this.fitnessMode);
+    }
+  }
+
+  /**
+   * Compute the coefficients of the polynomial using genes in
+   * the configured mode
+   * @param expressed
+   * @returns {Array}
+   * @private
+   */
+  _computeCoefficients(expressed) {
+    if(this.predictionMode === 'COEFFICIENTS') {
+      return this._expressPolyCoeffs(expressed); //Nothing to do, these are our coeffs
+    }else if(this.predictionMode === 'POLYFIT') {
+      return this._expressPolyfit(expressed);
+    }else {
+      throw new Error('Unknown prediction mode ' + this.predictionMode);
+    }
+  }
+
+  /**
+   * Express genes as polynomial coefficients by
+   * scaling each to between -10 to 10
+   * @param expressed - genes to use
+   * @returns {Array} - of predicted values
+   * @private
+   */
+  _expressPolyCoeffs(expressed) {
+    return expressed.map(v => -10 + 20 * v)
+  }
+
+  /**
+   * Evaluate by using expressed to compute a polynomial degree which
+   * creates a polynomial we then compare.
+   * @param expressed - genes to use
+   * @return {Array} - predicted y values
+   * @private
+   */
+   _expressPolyfit(expressed) {
+    const n   = this.params.samples;
+    const degree = expressed.reduce((s,g) => s + g, 0);
+    return PolyFit.polyFit(this.xTrue, this.yTrue, degree);
+  }
+
   /**
    * Horner's method to evaluate polynomials efficiently
    */
   _evaluatePolynomial(coefficients, x) {
     // genome = [a0, a1, a2, ...] → Σ aᵢ * xⁱ
     return coefficients.reduce((sum, c, i) => {
-        //We need coefficients [-10 to 10] but our genome is 0-1
-        const coeff = -10 + c * 20;
-        return sum + coeff * Math.pow(x, i)
-      }, 0);
+      return sum + c * Math.pow(x, i)
+    }, 0);
   }
 
   /**
@@ -113,7 +183,7 @@ class FunctionApproximation extends Problem {
    * - Always in (0,1]
    * - More gradient-friendly (great for optimization / evolution)
    * - By using an exponential you won’t get everything worse than baseline to collapse to 0
-   * @param yPred
+   * @param yPred - predicted y values by polynomial
    * @returns {number}
    * @private
    */
@@ -139,71 +209,6 @@ class FunctionApproximation extends Problem {
 
     // Smooth decay instead of hard cutoff
     return Math.exp(-mse / variance);
-  }
-
-  /**
-   * Evaluate by using expressed as polynomial coefficients values by
-   * scaling them between -10 to 10
-   * @param genome
-   * @param expressed
-   * @param organism
-   * @returns {number}
-   * @private
-   */
-  _evaluateMse(genome, expressed, organism) {
-    const n   = this.params.samples;
-    let mse = 0;
-
-    const yPred = [];
-    for (let i = 0; i < n; i++) {
-      const x    = i / (n - 1);
-      const pred = this._evaluatePolynomial(expressed, x);
-      yPred.push(pred);
-    }
-    return this._polynomialFitness(yPred);
-  }
-
-  /**
-   * Evaluate by using expressed to compute a polynomial degree which
-   * creates a polynomail we then compare.
-   * @param genome
-   * @param expressed
-   * @param organism
-   * @private
-   */
-  _evaluatePolyfit(genome, expressed, organism) {
-    const n   = this.params.samples;
-    const degree = expressed.reduce((s,g) => s + g, 0);
-    console.log(degree);
-
-    //Now fit a polynomial
-    const yPred = [];
-    const coeffs = PolyFit.polyFit(this.xTrue, this.yTrue, degree);
-    console.log(coeffs);
-    //Compute the predicted values
-    for (let i = 0; i < n; i++) {
-      const x = i / (n - 1);
-      const pred = this._evaluatePolynomial(coeffs, x);
-      yPred.push(pred);
-    }
-
-    //Compute the fitness of this poly
-    return this._polynomialFitness(yPred);
-  }
-
-  regenerate(args) {
-    this._targetFn = new Function("x", args[0]);
-    this._generateFit();
-  }
-
-  evaluate(genome, expressed, organism) {
-    if(this.mode === 'MSE') {
-      return this._evaluateMse(genome, expressed, organism);
-    }else if(this.mode === 'POLYFIT') {
-      return this._evaluatePolyfit(genome, expressed, organism);
-    }else {
-      throw new Error('Unknown mode ' + this.mode);
-    }
   }
 
   visualize(canvas, population, goal) {
@@ -253,16 +258,8 @@ class FunctionApproximation extends Problem {
 
         for (let px = 0; px <= iW; px++) {
           const x   = px / iW;
-          let y;
-          if(this.mode === 'MSE') {
-            y = this._evaluatePolynomial(ex, x);
-          }else if(this.mode === 'POLYFIT') {
-            const degree = ex.reduce((s,g) => s + g, 0);
-            const coeffs = PolyFit.polyFit(this.xTrue, this.yTrue, degree);
-            y = this._evaluatePolynomial(coeffs, x);
-          }else {
-            throw new Error('Unknown mode ' + this.mode);
-          }
+          const coefficients = this._computeCoefficients(ex);
+          const y = this._evaluatePolynomial(coefficients, x);
           px === 0 ? ctx.moveTo(toX(x), toY(y)) : ctx.lineTo(toX(x), toY(y));
         }
         ctx.stroke();
@@ -295,6 +292,20 @@ export const FA =  new FunctionApproximation({
       label: 'Target function',
       description: 'The function to evaluate the solutions against, this must return a y value for each x supplied.',
       value: 'return Math.sin(x * Math.PI * 2) * 0.5 + 0.5'
+    },
+    {
+      id: 'predictionMode',
+      label: 'Prediction mode',
+      description: 'How to use the genes to fit a polynomial curve.',
+      value: 'COEFFICIENTS',
+      selectValues: [{id: 'COEFFICIENTS', label: 'Coefficient Scale'}, {id: 'POLYFIT', label: 'Polynomial Degree'}]
+    },
+    {
+      id: 'fitnessMode',
+      label: 'Fitness computation mode',
+      description: 'How to evaluate the fitness of the predicted polynomail',
+      value: 'MSE',
+      selectValues: [{id: 'MSE', label: 'Mean square error'}, {id: 'SMOOTH', label: 'Smooth fit'}]
     }
   ]
 });
