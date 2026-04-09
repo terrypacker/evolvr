@@ -22,7 +22,7 @@
    ============================================================= */
 
 import { OrganismTypes, Population } from './engine.js';
-import { Gene, GeneRegistry } from './genes.js';
+import { GeneType, GeneRegistry } from './genes.js';
 
 import { state } from './app.js';
 /* ── COLOUR PALETTE ── */
@@ -575,7 +575,7 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
     }
 
     const typeList = [...selectedTypes];
-    const newGene = new Gene({
+    const newGene = new GeneType({
       name: name,
       types: typeList,
       fn: fn,
@@ -687,7 +687,7 @@ export function openOrganismEditor(organismId, evt, onChanged) {
 
       <div class="mf-group">
         <label class="field-label">Genome <span style="color:var(--text-muted)">(Latest generated solution)</span></label>
-        <div class="test-out">[${Array.from(organism?.genome).map(v => (+v).toFixed(4)).join(', ')}]</div>
+        <div class="test-out">[${Array.from(organism?.genome).map(v => (+v.value).toFixed(4)).join(', ')}]</div>
         <div class="gene-pool-note">The solution vector is used differently for each Problem and will once per generation.</div>
       </div>
       

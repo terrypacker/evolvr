@@ -21,13 +21,22 @@
    ============================================================= */
 'use strict';
 
-
 export class Gene {
+  constructor(id, value) {
+    this.id = id;
+    this.value = value;
+    //NEAT
+    //NEAT support: enabled
+    //NEAT support: age, do genes really die out?
+  }
+}
+
+export class GeneType {
   constructor(config = {}) {
-    this.name           = config.name             ?? 'default-gene';
+    this.name           = config.name           ?? 'default-gene';
     this.types          = config.types          ?? [];
     this.fn             = config.fn             ?? null;
-    this.description    = config.description      ?? '';
+    this.description    = config.description    ?? '';
   }
 }
 
@@ -44,8 +53,12 @@ export class Gene {
    ============================================================= */
 export const GeneRegistry = (() => {
   const _genes = new Map();
+  let _NEXT_GENE_ID = 1;
 
   const api = {
+    nextGeneId() {
+      return _NEXT_GENE_ID++;
+    },
     register(gene) {
       _genes.set(gene.name, gene);
     },
@@ -56,7 +69,7 @@ export const GeneRegistry = (() => {
     },
     allNames() { return [..._genes.keys()]; },
     all() { return [..._genes.values()]; },
-    get _genes() { return _genes; }
+    get_genes() { return _genes; }
   };
   return api;
 })();
@@ -68,7 +81,7 @@ export const GeneRegistry = (() => {
    TO ADD GENES: call GeneRegistry.register(...) below.
 */
 /* Explorer genes — good for spatial search */
-const boundaryPush = new Gene({
+const boundaryPush = new GeneType({
   name: 'boundaryPush',
   types: ['explorer', 'mutant'],
   fn: (genome, params) => {
@@ -78,7 +91,7 @@ const boundaryPush = new Gene({
 });
 GeneRegistry.register(boundaryPush);
 
-const randomWalk = new Gene({
+const randomWalk = new GeneType({
   name: 'randomWalk',
   types: ['explorer', 'mutant'],
   fn: (genome, params) => {
@@ -91,7 +104,7 @@ const randomWalk = new Gene({
 });
 GeneRegistry.register(randomWalk);
 
-const mirrorFold = new Gene({
+const mirrorFold = new GeneType({
   name: 'mirrorFold',
   types: ['explorer'],
   fn: (genome, params) => {
@@ -105,7 +118,7 @@ const mirrorFold = new Gene({
 GeneRegistry.register(mirrorFold);
 
 /* Climber genes — local hill climbing */
-const gradientNudge = new Gene({
+const gradientNudge = new GeneType({
   name: 'gradientNudge',
   types: ['climber', 'optimizer'],
   fn: (genome, params) => {
@@ -115,7 +128,7 @@ const gradientNudge = new Gene({
 });
 GeneRegistry.register(gradientNudge);
 
-const elitePull = new Gene({
+const elitePull = new GeneType({
   name: 'elitePull',
   types: ['climber'],
   fn: (genome, params) => {
@@ -126,7 +139,7 @@ const elitePull = new Gene({
 GeneRegistry.register(elitePull);
 
 /* Optimizer genes — mathematical transforms */
-const sinTransform = new Gene({
+const sinTransform = new GeneType({
   name: 'sinTransform',
   types: ['optimizer', 'climber'],
   fn: (genome, params) => {
@@ -136,7 +149,7 @@ const sinTransform = new Gene({
 });
 GeneRegistry.register(sinTransform);
 
-const normalize = new Gene({
+const normalize = new GeneType({
   name: 'normalize',
   types: ['optimizer', 'mutant'],
   fn: (genome, params) => {
@@ -147,7 +160,7 @@ const normalize = new Gene({
 });
 GeneRegistry.register(normalize);
 
-const rankSort = new Gene({
+const rankSort = new GeneType({
   name: 'rankSort',
   types: ['optimizer'],
   fn: (genome, params) => {
@@ -162,7 +175,7 @@ const rankSort = new Gene({
 GeneRegistry.register(rankSort);
 
 /* Mutant genes — high entropy */
-const bitFlip = new Gene({
+const bitFlip = new GeneType({
   name: 'bitFlip',
   types: ['mutant'],
   fn: (genome, params) => {
@@ -172,7 +185,7 @@ const bitFlip = new Gene({
 });
 GeneRegistry.register(bitFlip);
 
-const guassianNoise = new Gene({
+const guassianNoise = new GeneType({
   name: 'gaussianNoise',
   types: ['mutant', 'explorer'],
   fn: (genome, params) => {

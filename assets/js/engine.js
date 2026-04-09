@@ -23,7 +23,7 @@
             fitness evaluation, and population management.
    ============================================================= */
 'use strict';
-import { GeneRegistry } from './genes.js';
+import { Gene, GeneRegistry } from './genes.js';
 
 /* ── ORGANISM TYPE REGISTRY ───────────────────────────────────
    Define organism types with their associated gene pools.
@@ -76,10 +76,12 @@ export class Organism {
     const len = typeDef?.genomeLength ?? 8;
 
     if (genome) {
-      this.genome = Float32Array.from(genome);
+      this.genome = genome; //TODO Ensure genome is immutable?
     } else {
-      this.genome = new Float32Array(len);
-      for (let i = 0; i < len; i++) this.genome[i] = Math.random();
+      this.genome = new Array(len);
+      for (let i = 0; i < len; i++) {
+        this.genome[i] = new Gene(GeneRegistry.nextGeneId(), Math.random());
+      }
     }
 
     // Assign active genes (subset of type's gene pool)
@@ -92,9 +94,18 @@ export class Organism {
     }
   }
 
+  //TODO Replace this and use genome of Genes in problem implementations
+  genomeToFloat32() {
+    return new Float32Array(
+        this.genome
+        .sort((a, b) => a.id - b.id) // stable order
+        .map(g => g.value)
+    );
+  }
+
   /* Apply all active genes to produce an output vector */
   express(params = {}) {
-    let values = [...this.genome];
+    let values = this.genomeToFloat32();
     for (const geneName of this.genes) {
       const gene = GeneRegistry.get(geneName);
       if (gene) {
@@ -119,56 +130,227 @@ export class Organism {
 
   /* Create a child by crossover with a mate organism */
   reproduce(mate, mutationRate, mutationScale) {
-    const myLen   = this.genome.length;
-    const mateLen = mate.genome.length;
-    const len     = Math.max(myLen, mateLen);
+    // --- Species compatibility check ---
+    const sameSpecies = this.type === mate.type;
 
-    // Single-point crossover
-    const cut   = Math.floor(Math.random() * len);
-    const child = new Float32Array(len);
-    for (let i = 0; i < len; i++) {
-      const src = i < cut ? this.genome : mate.genome;
-      child[i]  = src[i % src.length] ?? Math.random();
-    }
+    // Reduce crossover effectiveness if cross-species
+    const crossoverRate = sameSpecies ? 1.0 : 0.3;
 
-    // Mutation
-    for (let i = 0; i < len; i++) {
-      if (Math.random() < mutationRate) {
-        child[i] = Math.max(0, Math.min(1,
-          child[i] + (Math.random() * 2 - 1) * mutationScale
-        ));
+    // crossover genes
+    const childGenes = this.crossoverNEATControlled(
+        mate,
+        mutationRate,
+        mutationScale,
+        crossoverRate
+    );
+
+    // --- Structural mutation (controlled) ---
+    // Try to adjust genome length based on fitness, if a fitter parent has a larger genome then
+    // add a gene, smaller then remove
+    let maybeAddGene;
+    if(this.fitness >= mate.fitness) {
+      if(this.genome.length > mate.genome.length) {
+        //Good mutations may add gene
+        maybeAddGene = true;
+      }else {
+        //Good mutations may remove gene
+        maybeAddGene = false;
       }
     }
 
-    // Inherit genes from both parents, with potential new genes
-    const myTypeDef   = OrganismTypes.get(this.type);
-    const mateTypeDef = OrganismTypes.get(mate.type);
-    const pool = [...new Set([
-      ...(myTypeDef?.genePool ?? []),
-      ...(mateTypeDef?.genePool ?? [])
-    ])];
-
-    const childGenes = [...new Set([
-      ...this.genes.filter(() => Math.random() < 0.6),
-      ...mate.genes.filter(() => Math.random() < 0.6)
-    ])];
-
-    // Occasionally pick up a random gene from the combined pool
-    if (Math.random() < 0.15 && pool.length > 0) {
-      const candidate = pool[Math.floor(Math.random() * pool.length)];
-      if (!childGenes.includes(candidate)) childGenes.push(candidate);
+    if(maybeAddGene) {
+      if (Math.random() < mutationRate * 0.5) {
+        childGenes.push(new Gene(GeneRegistry.nextGeneId(), Math.random()));
+      }
+    }else {
+      //Min length of genes is set here to 2
+      if (childGenes.length > 2 && Math.random() < mutationRate * 0.5) {
+        childGenes.splice(Math.floor(Math.random() * childGenes.length), 1);
+      }
     }
 
-    //Assign the last mate
-    this.mate = mate;
-    this.logMessage('Mated with ' + mate.id);
-    mate.mate = this.mate;
-    mate.logMessage('Mated with ' + this.id);
+    // --- Soft cap (prevents runaway growth) ---
+    const MAX_GENOME = 32;
+    if (childGenes.length > MAX_GENOME) {
+      childGenes.length = MAX_GENOME;
+    }
 
-    const childOrg   = new Organism(this.type, child);
-    childOrg.genes   = childGenes.length ? childGenes : this.genes.slice();
-    childOrg.type    = Math.random() < 0.8 ? this.type : mate.type;
-    return childOrg;
+    // --- Logging ---
+    this.mate = mate.id;
+    mate.mate = this.id;
+
+    this.logMessage(`Mated with ${mate.id}`);
+    mate.logMessage(`Mated with ${this.id}`);
+
+    // --- Child ---
+    const child = new Organism(this.type, childGenes);
+
+    // Mostly inherit species, but allow rare drift
+    child.type = Math.random() < 0.9 ? this.type : mate.type;
+
+    return child;
+  }
+
+  crossoverNEATControlled(mate, mutationRate, mutationScale, crossoverRate) {
+    const child = [];
+
+    const myGenes = new Map(this.genome.map(g => [g.id, g]));
+    const mateGenes = new Map(mate.genome.map(g => [g.id, g]));
+
+    const totalFitness = Math.max(0.0001, this.fitness + mate.fitness);
+    const myWeight = this.fitness / totalFitness;
+
+    const fitterIsMe = this.fitness >= mate.fitness;
+    const primary = fitterIsMe ? myGenes : mateGenes;
+    const secondary = fitterIsMe ? mateGenes : myGenes;
+
+    //Worse performers explore more, Better performers exploit the genome they have
+    const INNOVATION_RATE = this.fitness < mate.fitness ? 0.25 : 0.05;
+
+    // --- 1. Always include primary genes ---
+    for (const [id, gPrimary] of primary.entries()) {
+      const gOther = secondary.get(id);
+
+      let chosen;
+
+      if (gOther && Math.random() < crossoverRate) {
+        chosen = Math.random() < myWeight ? gPrimary : gOther;
+      } else {
+        chosen = gPrimary;
+      }
+
+      let value = chosen.value;
+
+      if (Math.random() < mutationRate) {
+        const delta =
+            (Math.random() * 2 - 1) *
+            mutationScale *
+            (Math.random() < 0.9 ? 1 : 5);
+
+        value = Math.max(0, Math.min(1, value + delta));
+      }
+
+      child.push(new Gene(id, value));
+    }
+
+    // --- 2. Occasionally include secondary-only genes ---
+    for (const [id, gSecondary] of secondary.entries()) {
+      if (!primary.has(id) && Math.random() < INNOVATION_RATE) {
+        child.push(new Gene(id, gSecondary.value));
+      }
+    }
+
+    return child;
+  }
+
+  /**
+   * NEAT-lite crossover: aligns genes by ID
+   */
+  crossoverNEATLite(mate, mutationRate, mutationScale) {
+    const child = [];
+
+    const myGenes = new Map(this.genome.map(g => [g.id, g]));
+    const mateGenes = new Map(mate.genome.map(g => [g.id, g]));
+
+    const allIds = new Set([...myGenes.keys(), ...mateGenes.keys()]);
+
+    const totalFitness = Math.max(0.0001, this.fitness + mate.fitness);
+    const myWeight = this.fitness / totalFitness;
+
+    for (const id of allIds) {
+      const g1 = myGenes.get(id);
+      const g2 = mateGenes.get(id);
+
+      let chosen;
+
+      if (g1 && g2) {
+        // Matching gene → fitness-weighted pick
+        chosen = Math.random() < myWeight ? g1 : g2;
+      } else {
+        // Disjoint/excess gene → take from fitter parent
+        if (g1 && this.fitness >= mate.fitness) chosen = g1;
+        else if (g2 && mate.fitness >= this.fitness) chosen = g2;
+        else continue;
+      }
+
+      let value = chosen.value;
+
+      // Mutation
+      if (Math.random() < mutationRate) {
+        const delta = Math.random() < 0.9
+            ? (Math.random() * 2 - 1) * mutationScale
+            : (Math.random() * 2 - 1) * mutationScale * 5;
+
+        value = Math.max(0, Math.min(1, value + delta));
+      }
+
+      child.push(new Gene(id, value));
+    }
+
+    return child;
+  }
+
+  _crossoverNEATGenes(mate, mutationRate, mutationScale) {
+    const childGenes = [];
+
+    const myGenes = new Map(this.genome.map(g => [g.id, g]));
+    const mateGenes = new Map(mate.genome.map(g => [g.id, g]));
+
+    const allIds = new Set([...myGenes.keys(), ...mateGenes.keys()]);
+
+    const totalFitness = Math.max(0.0001, this.fitness + mate.fitness);
+    const myWeight = this.fitness / totalFitness;
+
+    for (const id of allIds) {
+      const g1 = myGenes.get(id);
+      const g2 = mateGenes.get(id);
+
+      let chosen;
+
+      if (g1 && g2) {
+        // Matching gene → pick randomly (fitness-biased)
+        chosen = Math.random() < myWeight ? g1 : g2;
+      } else {
+        // Disjoint/excess gene → take from fitter parent
+        if (g1 && this.fitness >= mate.fitness) chosen = g1;
+        else if (g2 && mate.fitness >= this.fitness) chosen = g2;
+        else continue;
+      }
+
+      let value = chosen.value;
+
+      // Mutation
+      if (Math.random() < mutationRate) {
+        const delta = Math.random() < 0.9
+            ? (Math.random() * 2 - 1) * mutationScale
+            : (Math.random() * 2 - 1) * mutationScale * 5;
+
+        value = Math.max(0, Math.min(1, value + delta));
+      }
+
+      childGenes.push({
+        id,
+        value,
+        enabled: true
+      });
+    }
+
+    //TODO Do we want to add/remove genes and support NEAT
+    // Add new gene
+    if (Math.random() < mutationRate) {
+      childGenes.push({
+        id: getNextInnovationId(),
+        value: Math.random(),
+        enabled: true
+      });
+    }
+
+    // Remove gene
+    if (childGenes.length > 1 && Math.random() < mutationRate) {
+      childGenes.splice(Math.floor(Math.random() * childGenes.length), 1);
+    }
+
+    return childGenes;
   }
 
   logMessage(msg) {
@@ -238,7 +420,8 @@ export class Population {
     if (!this._problem) return;
     for (const org of this.organisms) {
       const expressed = org.express(this._problem.params ?? {});
-      org.fitness     = this._problem.evaluate(org.genome, expressed, org);
+      let genomeVector = org.genomeToFloat32();
+      org.fitness     = this._problem.evaluate(genomeVector, expressed, org);
       org.age++;
     }
   }
