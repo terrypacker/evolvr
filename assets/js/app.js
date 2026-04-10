@@ -34,7 +34,8 @@ import {
   openGeneList,
   openGeneEditor,
   openOrganismTypeEditor,
-  openOrganismEditor
+  openOrganismEditor,
+  openAchievedOrganisms
 } from './modals.js';
 import { openHelp } from './help.js';
 
@@ -307,6 +308,7 @@ function resetSim() {
     deathRate: (+dom.deathRateInput().value || state.deathRate) / 100,
     breedingChance: (+dom.breedingChanceInput().value || state.breedingChance) / 100,
     sameFitnessRandomness: (+dom.sameFitnessRandomnessInput().value || state.sameFitnessRandomness) / 100,
+    goal: +dom.goalSel().value
   });
   pop.setProblem(state.problem);
 
@@ -406,7 +408,6 @@ function updateDashboard() {
     ? '✓ ACHIEVED'
     : `${(state.goal.value * 100).toFixed(0)}% target`;
   goalEl.style.color = hit ? 'var(--green)' : 'var(--text-dim)';
-
   updateEventLog(pop.events);
   updateFitnessChart(pop.history);
   updateTypeChart(s.typeCounts);
@@ -596,9 +597,10 @@ function wireEvents() {
   });
 
   dom.goalSel().addEventListener('change', (e) => {
-    const val  = +e.target.value;
+    const val  = + e.target.value;
     state.goal = state.problem.goals.find(g => g.value === val)
               ?? state.problem.goals[0];
+    state.population.goal = state.goal;
     updateDashboard();
     if (!state.running) renderOnce();
   });
@@ -661,6 +663,8 @@ function wireEvents() {
     }
     dom.sameFitnessRandomnessText().innerHTML = (state.population.sameFitnessRandomness * 100).toFixed(2) + ' %';
   });
+
+  dom.cardGoalHit().addEventListener('click', openAchievedOrganisms);
 
   document.getElementById('btnHelp')?.addEventListener('click', openHelp);
 

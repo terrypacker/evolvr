@@ -41,7 +41,7 @@ export class Population {
     this.deathRate      = config.deathRate      ?? 0.2;
     this.breedingChance = config.breedingChance ?? 0.5;
     this.sameFitnessRandomness = config.sameFitnessRandomness ?? .5;
-
+    this.goal = config.goal ?? 1;
     this.organisms      = [];
     this.generation     = 0;
     this.bestFitness    = 0;
@@ -49,6 +49,8 @@ export class Population {
     this.history        = [];   // [{gen, best, avg, size}]
     this.events         = [];   // recent notable events
     this._problem       = null;
+
+    this.organismsAchievedGoal = new Map();
     this._oidSeq = 0;
   }
 
@@ -96,6 +98,10 @@ export class Population {
       const expressed = org.genome.express(this._problem.params ?? {});
       let chromosomeVector = org.genome.chromosomesToFloat32();
       org.fitness = this._problem.evaluate(chromosomeVector, expressed, org);
+      if(org.fitness > this.goal) {
+        this._addEvent(`Org ${org.id} achieved goal, fitness ${org.fitness.toFixed(2)}`);
+        this.organismsAchievedGoal.set(org.id, { ...org });
+      }
       org.age++;
     }
   }

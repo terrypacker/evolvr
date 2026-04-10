@@ -807,6 +807,37 @@ export function openOrganismEditor(organismId, evt, onChanged) {
   });
 }
 
+export function openAchievedOrganisms(evt) {
+  const achievedTable = [...state.population.organismsAchievedGoal].map(([id,org]) => {
+    const type = OrganismTypes.get(org.type);
+    const col = type?.color ?? '#6a7590';
+
+    return `<div class="pop-row">
+              <span class="pop-id" style="color: ${col}">${org.id}</span>
+              <span class="pop-type" style="color: ${col}">${org.type}</span>
+              <span class="pop-fitness" style="color: ${col}">${org.fitness.toFixed(4)}</span>
+              <span class="pop-age" style="color: ${col}">${org.age}</span>
+            </div>`
+  }).join('');
+  const bodyHTML = `
+    <div class="pop-list-wrap">
+      ${achievedTable}
+    </div>
+  `;
+
+  const footerHTML = `<button class="btn" id="bo_back">&#x2190; BACK</button>`;
+  const overlay = createModal('achievedOrganismsModal',
+      'ORGANISMS HIT GOAL',
+      bodyHTML, footerHTML
+  );
+  pushModal(overlay);
+
+  /* Back — pop editor, gene list re-appears */
+  overlay.querySelector('#bo_back').addEventListener('click', () => {
+    popModal('achievedOrganismsModal', () => refreshGeneList());
+  });
+}
+
 /* ── HELPERS ── */
 function showModalError(overlay, msg) {
   const footer = overlay.querySelector('.modal-footer');
