@@ -47,10 +47,10 @@ class PeakFinder extends Problem {
     this.params.peaks = this._generatePeaks(args[0], args[1]);
   }
 
-  evaluate(genome, expressed, organism) {
+  evaluate(chromosomeVector, expressed, organism) {
     if (!this.params.peaks) this.params.peaks = this._generatePeaks(this.settings[0].value, this.settings[1].value);
-    const x = expressed[0] ?? genome[0];
-    const y = expressed[1] ?? genome[1];
+    const x = expressed[0] ?? chromosomeVector[0];
+    const y = expressed[1] ?? chromosomeVector[1];
     return this._heightAt(x, y, this.params.peaks);
   }
 
@@ -92,8 +92,8 @@ class PeakFinder extends Problem {
       for (const org of population.organisms) {
         if (!org.alive) continue;
         const ex = org.express({});
-        const ox = (ex[0] ?? org.genome[0]) * W;
-        const oy = (ex[1] ?? org.genome[1]) * H;
+        const ox = (ex[0] ?? org.genome.chromosomes[0]) * W;
+        const oy = (ex[1] ?? org.genome.chromosomes[1]) * H;
         const r  = 3 + (org.fitness * 4);
         const col = this.typeColor(org.type);
 

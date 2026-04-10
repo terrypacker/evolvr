@@ -38,7 +38,7 @@ class BinaryKnapsack  extends Problem {
     this.params.items = this._generateItems(args[0], args[1]);
   }
 
-  evaluate(genome, expressed, organism) {
+  evaluate(chromosomes, expressed, organism) {
     if (!this.params.items) this.params.items = this._generateItems(this.settings[0].value, this.settings[1].value);
     const items    = this.params.items;
     const capacity = this.params.capacity;
@@ -47,7 +47,7 @@ class BinaryKnapsack  extends Problem {
     const maxV = items.reduce((s, it) => s + it.value, 0);
 
     for (let i = 0; i < items.length; i++) {
-      if ((expressed[i] ?? genome[i] ?? 0) > 0.5) {
+      if ((expressed[i] ?? chromosomes[i] ?? 0) > 0.5) {
         totalW += items[i].weight;
         totalV += items[i].value;
       }

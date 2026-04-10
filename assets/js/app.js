@@ -21,7 +21,8 @@
    APP.JS  —  UI Controller & Simulation Loop
    ============================================================= */
 
-import { Population, OrganismTypes } from './engine.js';
+import { Population } from './engine.js';
+import { OrganismTypes } from './organism.js';
 import { GeneRegistry } from './genes.js';
 import { Problems } from './problems.js';
 import { PF } from './peakFinder.js';

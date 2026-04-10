@@ -21,7 +21,124 @@
    ============================================================= */
 'use strict';
 
-export class Gene {
+export class Genome {
+  constructor(config = {}) {
+    this.genes = config.genes;
+    this.chromosomes = config.chromosomes;
+    this.organism = config.organism ?? null;
+  }
+
+  //TODO Replace this and use genome in problem implementations
+  chromosomesToFloat32() {
+    return new Float32Array(
+        this.chromosomes
+        .sort((a, b) => a.id - b.id) // stable order
+        .map(g => g.value)
+    );
+  }
+
+  express(params = {}) {
+    let values = this.chromosomesToFloat32();
+    for (const gene of this.genes) {
+      try {
+        const result = gene.fn(values, params);
+        if (Array.isArray(result) || result instanceof Float32Array) {
+          values = Array.from(result); //Combine results so they are additive per gene
+        }
+      } catch (e) {
+        // gene threw — mark it but continue
+        this.organism.logMessage(`gene error: ${gene.name} — ${e.message}`);
+      }
+    }
+    return values;
+  }
+
+  crossoverChromosomes(mate, mutationRate, mutationScale, crossoverRate) {
+    const myChromosomeMap = new Map(this.chromosomes.map(c => [c.id, c]));
+    const mateChromosomeMap = new Map(mate.genome.chromosomes.map(c => [c.id, c]));
+
+    const childChromosomes = [];
+
+    const totalFitness = Math.max(0.0001, this.organism.fitness + mate.fitness);
+    const myWeight = this.organism.fitness / totalFitness;
+
+    const fitterIsMe = this.organism.fitness >= mate.fitness;
+    const primary = fitterIsMe ? myChromosomeMap : mateChromosomeMap;
+    const secondary = fitterIsMe ? mateChromosomeMap : myChromosomeMap;
+
+    //Worse performers explore more, Better performers exploit the genome they have
+    const INNOVATION_RATE = this.organism.fitness < mate.fitness ? 0.25 : 0.05;
+
+    // --- 1. Always include primary genes ---
+    for (const [id, gPrimary] of primary.entries()) {
+      const gOther = secondary.get(id);
+
+      let chosen;
+
+      if (gOther && Math.random() < crossoverRate) {
+        chosen = Math.random() < myWeight ? gPrimary : gOther;
+      } else {
+        chosen = gPrimary;
+      }
+
+      let value = chosen.value;
+
+      if (Math.random() < mutationRate) {
+        const delta =
+            (Math.random() * 2 - 1) *
+            mutationScale *
+            (Math.random() < 0.9 ? 1 : 5);
+
+        value = Math.max(0, Math.min(1, value + delta));
+      }
+
+      childChromosomes.push(new Chromosome(id, value));
+    }
+
+    // --- 2. Occasionally include secondary-only genes ---
+    for (const [id, gSecondary] of secondary.entries()) {
+      if (!primary.has(id) && Math.random() < INNOVATION_RATE) {
+        childChromosomes.push(new Chromosome(id, gSecondary.value));
+      }
+    }
+
+    // --- Structural mutation (controlled) ---
+    // Try to adjust genome length based on fitness, if a fitter parent has a larger genome then
+    // add a gene, smaller then remove
+    let maybeAddChromosome
+    if(this.organism.fitness >= mate.fitness) {
+      if(this.chromosomes.length > mate.genome.chromosomes.length) {
+        //Good mutations may add
+        maybeAddChromosome = true;
+      }else {
+        //Good mutations may remove
+        maybeAddChromosome = false;
+      }
+    }
+
+    if(maybeAddChromosome) {
+      if (Math.random() < mutationRate * 50) {
+        childChromosomes.push(new Chromosome(GeneRegistry.nextChromosomeId(), Math.random()));
+      }
+    }else {
+      //Min length is set here to 2
+      if (childChromosomes.length > 2 && Math.random() < mutationRate * 50) {
+        childChromosomes.splice(Math.floor(Math.random() * childChromosomes.length), 1);
+      }
+    }
+
+    // --- Soft cap (prevents runaway growth) ---
+    const MAX_CHROMOSOMES = 32;
+    if (childChromosomes.length > MAX_CHROMOSOMES) {
+      childChromosomes.length = MAX_CHROMOSOMES;
+    }
+
+    return childChromosomes;
+  }
+
+}
+
+export class Chromosome {
   constructor(id, value) {
     this.id = id;
     this.value = value;
@@ -53,11 +170,11 @@ export class GeneType {
    ============================================================= */
 export const GeneRegistry = (() => {
   const _genes = new Map();
-  let _NEXT_GENE_ID = 1;
+  let _NEXT_CHROMOSOME_ID = 1;
 
   const api = {
-    nextGeneId() {
-      return _NEXT_GENE_ID++;
+    nextChromosomeId() {
+      return _NEXT_CHROMOSOME_ID++;
     },
     register(gene) {
       _genes.set(gene.name, gene);

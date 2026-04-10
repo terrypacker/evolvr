@@ -44,16 +44,21 @@ class TravelingSalesmanProblem extends Problem {
     this.params.cities = this._generateCities(args[0], args[1]);
   }
 
-  evaluate(genome, expressed, organism) {
+  evaluate(chromosomes, expressed, organism) {
     if (!this.params.cities) this.params.cities = this._generateCities(this.settings[0].value, this.settings[1].value);
-    const n = this.params.cities.length;
+    const n = this.params.cities.length < expressed.length ? this.params.cities.length : expressed.length;
+
     // Decode genome into tour order by ranking
     const indexed = expressed.slice(0, n).map((v, i) => [v, i]);
     indexed.sort((a, b) => a[0] - b[0]);
     const order = indexed.map(([, i]) => i);
     const dist  = this._tourLength(order, this.params.cities);
     organism._tourLen = dist;
-    return Math.max(0, 1 - dist / 5);
+    if(n === this.params.cities.length) {
+      return Math.max(0, 1 - dist / 5);
+    }else {
+      return Math.max(0, 1 - dist / 20);
+    }
   }
 
   visualize(canvas, population, goal) {
@@ -73,7 +78,7 @@ class TravelingSalesmanProblem extends Problem {
       for (const org of population.organisms) {
         if (org === population.bestOrganism) continue;
         const ex = org.express({});
-        const n  = cities.length;
+        const n = cities.length < ex.length ? cities.length : ex.length;
         const indexed = ex.slice(0, n).map((v, i) => [v, i]);
         indexed.sort((a, b) => a[0] - b[0]);
         const order = indexed.map(([, i]) => i);

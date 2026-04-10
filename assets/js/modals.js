@@ -21,7 +21,7 @@
    MODALS.JS  —  Organism Type Editor & Gene Editor Modals
    ============================================================= */
 
-import { OrganismTypes, Population } from './engine.js';
+import { OrganismTypes } from './organism.js';
 import { GeneType, GeneRegistry } from './genes.js';
 
 import { state } from './app.js';
@@ -603,7 +603,8 @@ export function openOrganismEditor(organismId, evt, onChanged) {
   const organism = state.population.getOrganism(organismId);
   const isEdit = true; //Edit or Create
 
-  const selectedGenes = new Set(organism?.genes ?? []);
+  const selectedGenes = new Set();
+  organism?.genome.genes.forEach(g => selectedGenes.add(g.name));
   const genePicker = GeneRegistry.all().length
       ? GeneRegistry.all().map(g => {
         const on = selectedGenes.has(g.name);
@@ -679,15 +680,15 @@ export function openOrganismEditor(organismId, evt, onChanged) {
       <div class="mf-group">
         <label class="field-label">
           Gene Pool
-          <span class="gene-sel-count" id="oe_geneCount">${organism.genes.length} selected</span>
+          <span class="gene-sel-count" id="oe_geneCount">${organism.genome.genes.length} selected</span>
         </label>
         <div class="gene-chip-grid" id="oe_geneGrid">${genePicker}</div>
         <div class="gene-pool-note">Click genes to toggle. Organisms randomly express a subset each generation.</div>
       </div>
 
       <div class="mf-group">
-        <label class="field-label">Genome <span style="color:var(--text-muted)">(Latest generated solution)</span></label>
-        <div class="test-out">[${Array.from(organism?.genome).map(v => (+v.value).toFixed(4)).join(', ')}]</div>
+        <label class="field-label">Chromosomes <span style="color:var(--text-muted)">(Latest generated solution)</span></label>
+        <div class="test-out">[${Array.from(organism?.genome.chromosomes).map(v => (+v.value).toFixed(4)).join(', ')}]</div>
         <div class="gene-pool-note">The solution vector is used differently for each Problem and will once per generation.</div>
       </div>
       
@@ -793,7 +794,12 @@ export function openOrganismEditor(organismId, evt, onChanged) {
       //Update in population
       organism.type = selectedType.id;
       organism.alive = alive;
-      organism.genes = selectedGenes;
+      //Modify the genome
+      const genes = [];
+      selectedGenes.forEach(g => {
+        genes.push(GeneRegistry.get(g));
+      })
+      organism.genome.genes = genes;
     }
 
     onChanged?.();

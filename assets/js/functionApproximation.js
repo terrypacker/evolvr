@@ -53,7 +53,7 @@ class FunctionApproximation extends Problem {
     this._generateFit();
   }
 
-  evaluate(genome, expressed, organism) {
+  evaluate(chromosomes, expressed, organism) {
     //Compute coefficients
     let coefficients = this._computeCoefficients(expressed);
 

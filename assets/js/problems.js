@@ -42,7 +42,7 @@
    The UI will pick it up automatically.
    ============================================================= */
 
-import { OrganismTypes } from './engine.js';
+import { OrganismTypes } from './organism.js';
 
 export class Problem {
   constructor(config = {}) {
@@ -58,7 +58,7 @@ export class Problem {
   regenerate(args) {
     throw new Error('Not implemented for problem ' + this.label);
   };
-  evaluate(genome, expressed, organism) {
+  evaluate(chromosomeVector, expressed, organism) {
     throw new Error('Not implemented for problem ' + this.label);
   };
   visualize(canvas, population, goal) {
