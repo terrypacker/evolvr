@@ -812,17 +812,23 @@ export function openAchievedOrganisms(evt) {
     const type = OrganismTypes.get(org.type);
     const col = type?.color ?? '#6a7590';
 
-    return `<div class="pop-row">
+    return `<div class="pop-row" data-org-id="${org.id}">
               <span class="pop-id" style="color: ${col}">${org.id}</span>
               <span class="pop-type" style="color: ${col}">${org.type}</span>
               <span class="pop-fitness" style="color: ${col}">${org.fitness.toFixed(4)}</span>
               <span class="pop-age" style="color: ${col}">${org.age}</span>
+              <div class="pop-fitness-bar">
+                <div class="pop-fitness-fill" style="width:${org.fitness*100}%;background:${col}44;border-right:2px solid ${col}"></div>
+              </div>
             </div>`
   }).join('');
   const bodyHTML = `
-    <div class="pop-list-wrap">
-      ${achievedTable}
-    </div>
+      <div style="padding: 0px 10px" data-achieved-orgamisms="true">
+        <div style="display:grid;grid-template-columns:34px 60px 58px 28px 1fr;gap:4px;padding:4px 4px;font-size:9px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;border-bottom:1px solid var(--border)">
+          <span>ID</span><span>TYPE</span><span>FITNESS</span><span>AGE</span><span>FITNESS</span>
+        </div>
+        ${achievedTable}
+      </div>
   `;
 
   const footerHTML = `<button class="btn" id="bo_back">&#x2190; BACK</button>`;
@@ -832,9 +838,17 @@ export function openAchievedOrganisms(evt) {
   );
   pushModal(overlay);
 
-  /* Back — pop editor, gene list re-appears */
+  /* Assign onclick to open org edit modal */
+  const rows = overlay.querySelectorAll('[data-org-id]');
+  rows.forEach(r => {
+    r.addEventListener('click', (evt) => {
+      openOrganismEditor(Number( r.getAttribute('data-org-id')), evt,() => {});
+    });
+  });
+
+  /* Back — pop editor, modal closes */
   overlay.querySelector('#bo_back').addEventListener('click', () => {
-    popModal('achievedOrganismsModal', () => refreshGeneList());
+    popModal('achievedOrganismsModal');
   });
 }
 

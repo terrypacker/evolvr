@@ -674,7 +674,7 @@ function wireEvents() {
     dom.sameFitnessRandomnessText().innerHTML = (state.population.sameFitnessRandomness * 100).toFixed(2) + ' %';
   });
 
-  dom.cardGoalHit().addEventListener('click', openAchievedOrganisms);
+  document.querySelector('.dc-goal').addEventListener('click', openAchievedOrganisms);
 
   document.getElementById('btnHelp')?.addEventListener('click', openHelp);
 
