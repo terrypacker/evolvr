@@ -81,25 +81,31 @@
         </div>
         <div id="problemSettingsTabHeader" class="panel-header tab-header">
           <span class="panel-tag">CFG</span>
-          <span class="panel-title">PARAMETERS</span>
+          <span class="panel-title">CONFIG</span>
         </div>
       </div>
       <div id="problemTab" class="tab-content" style="display:block">
         <!-- Problem Selection -->
         <div class="panel">
-          <div class="problem-wrap">
-            <label class="field-label">Optimization target</label>
-            <select class="field-select" id="problemSel"></select>
-            <div class="problem-desc" id="problemDesc"></div>
-            <div style="margin-top:10px">
-              <label class="field-label" id="goalLabel">Goal</label>
+          <div class="field-row">
+            <div class="field-group">
+              <label>Optimization target</label>
+              <select class="field-select" id="problemSel"></select>
+              <div class="problem-desc" id="problemDesc"></div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label id="goalLabel">Goal</label>
               <select class="field-select" id="goalSel"></select>
             </div>
-            <div id="problemSettings" style="margin-top:10px">
-            </div>
-            <div style="margin-top:10px">
+          </div>
+          <div class="field-row"  id="problemSettings">
+          </div>
+          <div class="field-row">
+            <div class="field-group">
               <button class="btn" id="problemRegenerateButton">Regenerate</button>
-            </div>
+              </div>
           </div>
         </div>
       </div>

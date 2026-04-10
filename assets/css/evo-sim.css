@@ -334,7 +334,7 @@ html, body { height: 100%; overflow: hidden; font-size: 13px; }
     padding-left: 5px;
   }
 
-  /* ── CONFIG PANEL ── */
+  /* ── CONFIG STYLES TODO: replace with field-input... ── */
   .config-row {
     display: flex;
     gap: 8px;
@@ -354,12 +354,13 @@ html, body { height: 100%; overflow: hidden; font-size: 13px; }
   .config-item label {
     display: block;
     font-size: 9px;
-    color: var(--text-muted);
+    color: var(--text-dim);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: 4px;
   }
-  .config-item input {
+
+  .config-item input, .config-select {
     width: 100%;
     background: var(--bg-input);
     border: 1px solid var(--border-hi);
@@ -369,12 +370,16 @@ html, body { height: 100%; overflow: hidden; font-size: 13px; }
     font-size: 12px;
     padding: 4px 6px;
     outline: none;
+    transition: border-color 0.15s;
   }
+
+  .config-select option { background: var(--bg-panel2); }
+
   .config-item input:focus + .config-slider-value {
     display: inline;
   }
+  .config-item input:focus, .config-select:focus { border-color: var(--amber-dim); }
 
-  .config-item input:focus { border-color: var(--amber-dim); }
 
   /* ── PANEL BADGE VARIANT ── */
   .badge-green {

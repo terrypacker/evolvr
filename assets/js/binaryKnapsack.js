@@ -197,8 +197,8 @@ export const KS = new BinaryKnapsack({
     },
     {
       id: 'seed',
-      label: 'Seed for weight and value',
-      description: 'Allows you to vary the weights and values of the items.',
+      label: 'Seed',
+      description: 'Seed value to vary the weights and values of the items.',
       value: 99
     }
   ]

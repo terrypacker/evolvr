@@ -206,9 +206,14 @@ function buildProblemSettings() {
   const paramsDiv = dom.problemSettings();
   paramsDiv.innerHTML = '';
   for (const p of state.problem.settings) {
+    const fieldGroup = document.createElement('div');
+    fieldGroup.classList.add('field-group');
+    if(p.flex) {
+      fieldGroup.style.flex = p.flex;
+    }
+
     const label = document.createElement('label');
     label.textContent = p.label;
-    label.classList.add('field-label');
 
     let input;
     if(p.selectValues) {
@@ -221,8 +226,12 @@ function buildProblemSettings() {
       input.appendChild(fragment);
       input.classList.add('field-select');
     }else {
-      input = document.createElement('input');
-      input.classList.add('field-input');
+      if(p.element) {
+        input = document.createElement(p.element);
+      }else {
+        input = document.createElement('input');
+      }
+
     }
 
     input.id = 'problem-setting-' + p.id;
@@ -232,9 +241,10 @@ function buildProblemSettings() {
     note.classList.add('gene-pool-note');
     note.textContent = p.description;
 
-    paramsDiv.appendChild(label);
-    paramsDiv.appendChild(input);
-    paramsDiv.appendChild(note);
+    fieldGroup.appendChild(label);
+    fieldGroup.appendChild(input);
+    fieldGroup.appendChild(note);
+    paramsDiv.appendChild(fieldGroup);
   }
 }
 

@@ -291,7 +291,9 @@ export const FA =  new FunctionApproximation({
       id: 'targetFn',
       label: 'Target function',
       description: 'The function to evaluate the solutions against, this must return a y value for each x supplied.',
-      value: 'return Math.sin(x * Math.PI * 2) * 0.5 + 0.5'
+      value: 'return Math.sin(x * Math.PI * 2) * 0.5 + 0.5',
+      element: 'textarea',
+      flex: '0 1 100%'
     },
     {
       id: 'predictionMode',
@@ -302,7 +304,7 @@ export const FA =  new FunctionApproximation({
     },
     {
       id: 'fitnessMode',
-      label: 'Fitness computation mode',
+      label: 'Fitness mode',
       description: 'How to evaluate the fitness of the predicted polynomail',
       value: 'MSE',
       selectValues: [{id: 'MSE', label: 'Mean square error'}, {id: 'SMOOTH', label: 'Smooth fit'}]
