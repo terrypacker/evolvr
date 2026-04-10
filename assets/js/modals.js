@@ -670,7 +670,7 @@ export function openOrganismEditor(organismId, evt, onChanged) {
       <div class="mf-group">
         <label class="field-label">Mate <span style="color:var(--text-muted)">(Most recent organism mated with)</span></label>
         <div class="field-input mono"
-          readonly style="opacity:0.5;cursor:not-allowed">
+          style="opacity:0.5;cursor:not-allowed">
           ${lastMate?.id ?? 'None'}</div>
       </div>
       <div class="mf-group">
