@@ -29,6 +29,8 @@ import { PF } from './peakFinder.js';
 import { KS } from './binaryKnapsack.js';
 import { FA } from './functionApproximation.js';
 import { TSP } from './travelingSalesman.js';
+import { COT } from './crudeOilTrader.js';
+
 import {
   openOrganismList,
   openGeneList,
@@ -40,7 +42,7 @@ import {
 import { openHelp } from './help.js';
 
 /* ── PROBLEM TYPE DEFINITIONS ──────────────────────────────── */
-Problems.push(PF, FA, KS, TSP);
+Problems.push(PF, FA, KS, TSP, COT);
 
 /* ── ORGANISM TYPE DEFINITIONS ──────────────────────────────── */
 OrganismTypes.register({
