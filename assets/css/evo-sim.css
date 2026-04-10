@@ -146,6 +146,10 @@ html, body { height: 100%; overflow: hidden; font-size: 13px; }
 }
 
 .dash-card.dc-goal .dc-value { font-size: 11px; }
+.dc-goal:hover {
+  background: var(--bg-panel);
+  cursor: pointer; /* Change mouse cursor */
+}
 
 /* ── VIZ CANVAS ── */
 .viz-wrap {
