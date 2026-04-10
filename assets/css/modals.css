@@ -108,7 +108,7 @@ limitations under the License.
 .modal-form { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 
 .mf-group { display: flex; flex-direction: column; }
-.mf-row   { display: flex; gap: 10px; }
+.   { display: flex; gap: 10px; }
 .mf-flex1 { flex: 1; }
 .mf-flex2 { flex: 2; }
 
@@ -335,7 +335,7 @@ limitations under the License.
 #geneModal .modal-box { max-width: 700px; }
 
 /* ── SELECTED GENE COUNT IN FIELD LABEL ── */
-.field-label .gene-sel-count { vertical-align: middle; }
+.gene-sel-count { vertical-align: middle; }
 
 /* ── MODAL STACK NAVIGATION ── */
 

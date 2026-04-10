@@ -86,7 +86,7 @@
       </div>
       <div id="problemTab" class="tab-content" style="display:block">
         <!-- Problem Selection -->
-        <div class="panel">
+        <div class="panel problem-panel">
           <div class="field-row">
             <div class="field-group">
               <label>Optimization target</label>
@@ -111,49 +111,49 @@
       </div>
       <div id="problemSettingsTab" class="tab-content">
         <!-- Population Config -->
-        <div class="panel">
-          <div class="config-row">
-            <div class="config-item">
+        <div class="panel problem-panel">
+          <div class="field-row">
+            <div class="field-group">
               <label>Max Pop</label>
               <input type="number" id="maxPopInput" value="40" min="10" max="200">
             </div>
-            <div class="config-item">
+            <div class="field-group">
               <label>Mut% Rate</label>
               <input type="number" id="mutRateInput" value="10" min="1" max="50">
             </div>
-            <div class="config-item">
+            <div class="field-group">
               <label>Mut% Scale</label>
               <input type="number" id="mutScaleInput" value="20" min="1" max="80">
             </div>
           </div>
-          <div class="config-row">
-            <div class="config-item">
+          <div class="field-row">
+            <div class="field-group">
               <label>Elite count</label>
               <input type="number" id="eliteCountInput" value="3" min="0" max="200">
               <div class="gene-pool-note">Always retain this number of the fittest organisms</div>
             </div>
           </div>
-          <div class="config-row">
-            <div class="config-item">
+          <div class="field-row">
+            <div class="field-group">
               <label>Death % rate</label>
               <input type="range" id="deathRateInput" value="10" min="0" max="100" step="0.1">
-              <span class="config-slider-value" id="deathRateText"></span>
+              <span class="field-slider-value" id="deathRateText"></span>
               <div class="gene-pool-note">% of population that dies every generation</div>
             </div>
           </div>
-          <div class="config-row">
-            <div class="config-item">
+          <div class="field-row">
+            <div class="field-group">
               <label>Breeding % rate</label>
               <input type="range" id="breedingChanceInput" value="20" min="0" max="100" step="0.1">
-              <span class="config-slider-value" id="breedingChanceText"></span>
+              <span class="field-slider-value" id="breedingChanceText"></span>
               <div class="gene-pool-note">% of population selected to breed every generation</div>
             </div>
           </div>
-          <div class="config-row">
-            <div class="config-item">
+          <div class="field-row">
+            <div class="field-group">
               <label for="sameFitnessRandomnessInput">Fitness randomization</label>
               <input type="range" id="sameFitnessRandomnessInput" value="50" min="0" max="100" step="0.1">
-              <span class="config-slider-value" id="sameFitnessRandomnessText"></span>
+              <span class="field-slider-value" id="sameFitnessRandomnessText"></span>
               <div class="gene-pool-note">Level of randomization for organsims of same fitness</div>
             </div>
           </div>

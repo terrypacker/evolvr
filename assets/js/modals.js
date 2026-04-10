@@ -205,58 +205,58 @@ export function openOrganismTypeEditor(typeId, onChanged) {
 
   const bodyHTML = `
     <div class="modal-form">
-      <div class="mf-row">
-        <div class="mf-group mf-flex2">
-          <label class="field-label">Display Name</label>
-          <input class="field-input" id="mo_label" placeholder="e.g. Drifter"
+      <div class="field-row">
+        <div class="field-group mf-flex2">
+          <label >Display Name</label>
+          <input  id="mo_label" placeholder="e.g. Drifter"
                  value="${existing?.label ?? ''}">
         </div>
-        <div class="mf-group mf-flex1">
-          <label class="field-label">ID <span style="color:var(--text-muted)">(no spaces)</span></label>
-          <input class="field-input mono" id="mo_id" placeholder="e.g. drifter"
+        <div class="field-group mf-flex1">
+          <label >ID <span style="color:var(--text-muted)">(no spaces)</span></label>
+          <input  id="mo_id" placeholder="e.g. drifter"
                  value="${existing?.id ?? ''}"
                  ${isEdit ? 'readonly style="opacity:0.5;cursor:not-allowed"' : ''}>
         </div>
       </div>
 
-      <div class="mf-group">
-        <label class="field-label">Description</label>
-        <input class="field-input" id="mo_desc"
+      <div class="field-group">
+        <label >Description</label>
+        <input  id="mo_desc"
                placeholder="Short description of this organism's strategy"
                value="${existing?.description ?? ''}">
       </div>
 
-      <div class="mf-row">
-        <div class="mf-group mf-flex1">
-          <label class="field-label">Genome Length</label>
-          <input class="field-input mono" id="mo_glen" type="number" min="4" max="32"
+      <div class="field-row">
+        <div class="field-group mf-flex1">
+          <label >Genome Length</label>
+          <input  id="mo_glen" type="number" min="4" max="32"
                  value="${existing?.genomeLength ?? 12}">
         </div>
-        <div class="mf-group mf-flex1">
-          <label class="field-label">Mutation Rate %</label>
-          <input class="field-input mono" id="mo_mrate" type="number" min="1" max="80"
+        <div class="field-group mf-flex1">
+          <label >Mutation Rate %</label>
+          <input  id="mo_mrate" type="number" min="1" max="80"
                  value="${Math.round((existing?.mutationRate ?? 0.12) * 100)}">
         </div>
-        <div class="mf-group mf-flex1">
-          <label class="field-label">Mutation Scale %</label>
-          <input class="field-input mono" id="mo_mscale" type="number" min="1" max="80"
+        <div class="field-group mf-flex1">
+          <label >Mutation Scale %</label>
+          <input  id="mo_mscale" type="number" min="1" max="80"
                  value="${Math.round((existing?.mutationScale ?? 0.20) * 100)}">
         </div>
       </div>
 
-      <div class="mf-group">
-        <label class="field-label">Colour</label>
+      <div class="field-group">
+        <label >Colour</label>
         <div class="color-palette" id="mo_palette">${colourPicker}</div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-          <input class="field-input mono" id="mo_colorHex" value="${pickedColor}"
+          <input  id="mo_colorHex" value="${pickedColor}"
                  placeholder="#rrggbb" style="max-width:110px">
           <div class="color-preview" id="mo_colorPreview" style="background:${pickedColor}"></div>
           <span style="font-size:9px;color:var(--text-muted)">or enter hex code</span>
         </div>
       </div>
 
-      <div class="mf-group">
-        <label class="field-label">
+      <div class="field-group">
+        <label >
           Gene Pool
           <span class="gene-sel-count" id="mo_geneCount">${selectedGenes.size} selected</span>
         </label>
@@ -435,23 +435,23 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
 
   const bodyHTML = `
     <div class="modal-form">
-      <div class="mf-row">
-        <div class="mf-group mf-flex2">
-          <label class="field-label">Gene Name <span style="color:var(--text-muted)">(camelCase, no spaces)</span></label>
-          <input class="field-input mono" id="ge_name" placeholder="e.g. spiralSearch"
+      <div class="field-row">
+        <div class="field-group mf-flex2">
+          <label >Gene Name <span style="color:var(--text-muted)">(camelCase, no spaces)</span></label>
+          <input  id="ge_name" placeholder="e.g. spiralSearch"
                  value="${existing?.name ?? ''}"
                  ${isEdit ? 'readonly style="opacity:0.5;cursor:not-allowed"' : ''}>
         </div>
       </div>
 
-      <div class="mf-group">
-        <label class="field-label">Description <span style="color:var(--text-muted);font-weight:400">(shown in gene list &amp; help)</span></label>
-        <input class="field-input" id="ge_desc" placeholder="What this gene does mathematically and when to use it"
+      <div class="field-group">
+        <label >Description <span style="color:var(--text-muted);font-weight:400">(shown in gene list &amp; help)</span></label>
+        <input  id="ge_desc" placeholder="What this gene does mathematically and when to use it"
                value="${escapeHTML(existing?.description ?? '')}">
       </div>
 
-      <div class="mf-group">
-        <label class="field-label">
+      <div class="field-group">
+        <label >
           Organism Types
           <span class="gene-sel-count" id="ge_typeCount">${selectedTypes.size} selected</span>
         </label>
@@ -459,8 +459,8 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
         <div class="gene-pool-note">Which organism types are eligible to carry this gene.</div>
       </div>
 
-      <div class="mf-group">
-        <label class="field-label">
+      <div class="field-group">
+        <label >
           Gene Function
           <span style="color:var(--text-muted);font-size:9px;margin-left:6px">
             body of: <code style="color:var(--cyan)">function(genome, params) { ... }</code>
@@ -636,49 +636,47 @@ export function openOrganismEditor(organismId, evt, onChanged) {
 
   const bodyHTML = `
     <div class="modal-form">
-      <div class="mf-row">
-        <div class="mf-group mf-flex2">
-          <label class="field-label">Organism ID <span style="color:var(--text-muted)">(Unique identfier assigned during simulation)</span></label>
-          <input class="field-input mono" id="org_id"
-                 value="${organism?.id ?? ''}"
-                 readonly style="opacity:0.5;cursor:not-allowed">
-        </div>
+      <div class="field-group">
+        <label class=>Organism ID <span style="color:var(--text-muted)">(Unique identfier assigned during simulation)</span></label>
+        <input id="org_id"
+             disabled value="${organism?.id ?? ''}"
+             readonly style="opacity:0.5;cursor:not-allowed">
       </div>
-      <div class="mf-group">
-        <label class="field-label">State <span style="color:var(--text-muted)">(Alive or Deceased)</span></label>
-        <input class="field-checkbox mono" type="checkbox" id="org_alive"
-            ${organism?.alive ? 'checked' : ''} >
+      <div class="field-group">
+        <label >State <span style="color:var(--text-muted)">(Alive or Deceased)</span></label>
+        <input class="field-checkbox mono" type="checkbox" style="width: auto" id="org_alive"
+               disabled ${organism?.alive ? 'checked' : ''} >
       </div>
-      <div class="mf-group">
-        <label class="field-label">Age <span style="color:var(--text-muted)">(Number of generations lived)</span></label>
-        <input class="field-input mono" id="org_age"
+      <div class="field-group">
+        <label >Age <span style="color:var(--text-muted)">(Number of generations lived)</span></label>
+        <input id="org_age"
                value="${organism?.age ?? ''}"
-               readonly style="opacity:0.5;cursor:not-allowed">
+               disabled style="opacity:0.5;cursor:not-allowed">
       </div>
-      <div class="mf-group">
-        <label class="field-label">Fitness <span style="color:var(--text-muted)">(Ability to solve problem [0-1])</span></label>
-        <input class="field-input mono" id="org_fitness"
+      <div class="field-group">
+        <label >Fitness <span style="color:var(--text-muted)">(Ability to solve problem [0-1])</span></label>
+        <input id="org_fitness"
                value="${organism?.fitness.toFixed(4) ?? ''}"
-               'readonly style="opacity:0.5;cursor:not-allowed">
+               disabled style="opacity:0.5;cursor:not-allowed">
       </div>
-      <div class="mf-group">  
-        <label class="field-label">Children <span style="color:var(--text-muted)">(Number of children generated)</span></label>
-        <input class="field-input mono" id="org_children"
+      <div class="field-group">  
+        <label >Children <span style="color:var(--text-muted)">(Number of children generated)</span></label>
+        <input  id="org_children"
                value="${organism?.children ?? ''}"
-               'readonly style="opacity:0.5;cursor:not-allowed">
+               disabled style="opacity:0.5;cursor:not-allowed">
       </div>
-      <div class="mf-group">
-        <label class="field-label">Mate <span style="color:var(--text-muted)">(Most recent organism mated with)</span></label>
-        <div class="field-input mono"
+      <div class="field-group">
+        <label >Mate <span style="color:var(--text-muted)">(Most recent organism mated with)</span></label>
+        <div 
           style="opacity:0.5;cursor:not-allowed">
           ${lastMate?.id ?? 'None'}</div>
       </div>
-      <div class="mf-group">
-        <label class="field-label">Type <span style="color:var(--text-muted)">(Organism type at birth)</span></label>
+      <div class="field-group">
+        <label >Type <span style="color:var(--text-muted)">(Organism type at birth)</span></label>
         <div class="gene-chip-grid" id="oe_typeGrid">${typeChips}</div>
       </div>
-      <div class="mf-group">
-        <label class="field-label">
+      <div class="field-group">
+        <label >
           Gene Pool
           <span class="gene-sel-count" id="oe_geneCount">${organism.genome.genes.length} selected</span>
         </label>
@@ -686,14 +684,14 @@ export function openOrganismEditor(organismId, evt, onChanged) {
         <div class="gene-pool-note">Click genes to toggle. Organisms randomly express a subset each generation.</div>
       </div>
 
-      <div class="mf-group">
-        <label class="field-label">Chromosomes <span style="color:var(--text-muted)">(Latest generated solution)</span></label>
+      <div class="field-group">
+        <label >Chromosomes <span style="color:var(--text-muted)">(Latest generated solution)</span></label>
         <div class="test-out">[${Array.from(organism?.genome.chromosomes).map(v => (+v.value).toFixed(4)).join(', ')}]</div>
         <div class="gene-pool-note">The solution vector is used differently for each Problem and will once per generation.</div>
       </div>
       
-      <div class="mf-group">
-        <label class="field-label">Logs <span style="color:var(--text-muted)">(Important life events)</span></label>
+      <div class="field-group">
+        <label >Logs <span style="color:var(--text-muted)">(Important life events)</span></label>
         ${organismLogs}
       </div>
       <div class="code-error" id="oe_error"></div>
