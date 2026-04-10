@@ -206,12 +206,12 @@ export function openOrganismTypeEditor(typeId, onChanged) {
   const bodyHTML = `
     <div class="modal-form">
       <div class="field-row">
-        <div class="field-group mf-flex2">
+        <div class="field-group">
           <label >Display Name</label>
           <input  id="mo_label" placeholder="e.g. Drifter"
                  value="${existing?.label ?? ''}">
         </div>
-        <div class="field-group mf-flex1">
+        <div class="field-group">
           <label >ID <span style="color:var(--text-muted)">(no spaces)</span></label>
           <input  id="mo_id" placeholder="e.g. drifter"
                  value="${existing?.id ?? ''}"
@@ -227,17 +227,17 @@ export function openOrganismTypeEditor(typeId, onChanged) {
       </div>
 
       <div class="field-row">
-        <div class="field-group mf-flex1">
+        <div class="field-group">
           <label >Genome Length</label>
           <input  id="mo_glen" type="number" min="4" max="32"
                  value="${existing?.genomeLength ?? 12}">
         </div>
-        <div class="field-group mf-flex1">
+        <div class="field-group">
           <label >Mutation Rate %</label>
           <input  id="mo_mrate" type="number" min="1" max="80"
                  value="${Math.round((existing?.mutationRate ?? 0.12) * 100)}">
         </div>
-        <div class="field-group mf-flex1">
+        <div class="field-group">
           <label >Mutation Scale %</label>
           <input  id="mo_mscale" type="number" min="1" max="80"
                  value="${Math.round((existing?.mutationScale ?? 0.20) * 100)}">
@@ -436,7 +436,7 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
   const bodyHTML = `
     <div class="modal-form">
       <div class="field-row">
-        <div class="field-group mf-flex2">
+        <div class="field-group">
           <label >Gene Name <span style="color:var(--text-muted)">(camelCase, no spaces)</span></label>
           <input  id="ge_name" placeholder="e.g. spiralSearch"
                  value="${existing?.name ?? ''}"

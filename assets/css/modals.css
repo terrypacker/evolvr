@@ -107,11 +107,6 @@ limitations under the License.
 /* ── FORM LAYOUT ── */
 .modal-form { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 
-.mf-group { display: flex; flex-direction: column; }
-.   { display: flex; gap: 10px; }
-.mf-flex1 { flex: 1; }
-.mf-flex2 { flex: 2; }
-
 /* ── COLOUR PALETTE ── */
 .color-palette {
   display: flex;
