@@ -79,6 +79,31 @@
         </div>
       </div>
       <div class="help-item">
+        <div class="help-item-head"><span class="help-tag help-problem-name">Crude Oil Trader</span></div>
+        <div class="help-field-grid">
+          <div class="help-field">
+            <div class="help-field-name" style="color:var(--cyan)">Initial Account ($)</div>
+            <div class="help-field-desc">Starting capital for the simulated trading account. All position sizing and P&amp;L is denominated in this currency. A larger account allows more contracts to be traded per signal.</div>
+          </div>
+          <div class="help-field">
+            <div class="help-field-name" style="color:var(--cyan)">History Bars</div>
+            <div class="help-field-desc">Number of daily OHLCV bars to simulate. 252 bars ≈ one trading year, 504 ≈ two years. More bars give a longer backtest but take more time to evaluate each organism.</div>
+          </div>
+          <div class="help-field">
+            <div class="help-field-name" style="color:var(--cyan)">WTI Start Price ($)</div>
+            <div class="help-field-desc">The initial WTI crude oil price used as the anchor for synthetic data generation. Changing this shifts the price regime — for example, setting $45 simulates a low-price environment while $100 simulates a high-price regime.</div>
+          </div>
+          <div class="help-field">
+            <div class="help-field-name" style="color:var(--cyan)">Price Series Seed</div>
+            <div class="help-field-desc">Seed for the deterministic synthetic price generator. Different seeds produce different market regimes (trending, choppy, mean-reverting). Use this to stress-test evolved strategies across varied conditions — a robust strategy should perform well on multiple seeds.</div>
+          </div>
+          <div class="help-field">
+            <div class="help-field-name" style="color:var(--cyan)">Risk-free Rate (%)</div>
+            <div class="help-field-desc">Annualised risk-free rate used in two places: subtracted from daily returns when computing the Sharpe ratio, and used as the discount rate in Black-Scholes option pricing. Reflects prevailing interest rates — higher values make options cheaper and set a higher bar for the Sharpe calculation.</div>
+          </div>
+        </div>
+      </div>
+      <div class="help-item">
         <div class="help-item-head"><span class="help-tag help-problem-name">Traveling Salesman</span></div>
         <div class="help-field-grid">
           <div class="help-field">
@@ -116,6 +141,11 @@
     <div class="help-problem-name">Traveling Salesman</div>
     <p>The genome encodes a visit order for a set of cities. Organisms evolve the shortest possible tour visiting all cities and returning to the start. The best tour is shown in amber; other population tours are shown faintly in their type colour.</p>
     <div class="help-problem-tip">This problem is NP-hard, so a diverse mix of all four types works best — Mutants escape local optima while Climbers refine short routes.</div>
+  </div>
+  <div class="help-problem-card">
+    <div class="help-problem-name">Crude Oil Trader</div>
+    <p>The genome encodes the parameters of a systematic trading strategy applied to synthetic WTI Crude Oil futures. Organisms evolve EMA crossover windows, RSI thresholds, out-of-the-money option strike offsets, position sizing, and stop-loss levels simultaneously. The visualization shows a candlestick price chart with the best organism's fast and slow EMAs overlaid (blue and amber lines), a metrics panel showing the best strategy's return, Sharpe ratio, maximum drawdown and trade count, and an equity curve panel comparing all strategies against a passive buy-and-hold baseline. The gold dot marks the best strategy's final portfolio value.</p>
+    <div class="help-problem-tip">Explorer and Mutant types help escape deceptive parameter combinations (e.g. a fast EMA that looks good on trending legs but fails on reversals). Climbers then refine the timing thresholds once a promising region is found. A strategy that performs well across multiple Price Series Seeds is genuinely robust.</div>
   </div>
 </div>
 
@@ -163,6 +193,26 @@
     <p>If total weight W exceeds capacity C = 0.5, fitness is <em>max(0, 1 − 2·(W − C))</em> — a steep linear penalty. If W ≤ C, fitness is <em>V / V_max</em> where V_max is the sum of all item values. The fitness landscape is inherently discontinuous: a tiny shift in one expressed value can flip a binary decision and cause a large jump in fitness. There are 2¹² = 4096 possible subsets.</p>
     <p><strong>Good genes for this problem:</strong> Genes that push values decisively toward 0 or 1 are valuable because they make binary decisions cleaner. <code>boundaryPush</code> works against this (it pushes values away from extremes), but <code>bitFlip</code> is useful — it randomly commits some positions to 0 or 1. Conversely, <code>normalize</code> scales values so the largest is always 1.0, which can flip a non-selected item into selected without touching its genome position.</p>
     <p><strong>Problematic genes:</strong> <code>gradientNudge</code> and <code>sinTransform</code> pull values toward 0.5, which is the decision threshold — this creates ambiguous near-0.5 values that the stochastic evaluation can flip unpredictably. <code>mirrorFold</code> forces half the items to always be the complement of the other half, eliminating half the solution space.</p>
+  </div>
+
+  <div class="help-item">
+    <div class="help-item-head"><span class="help-tag" style="color:var(--amber);border-color:var(--amber-dim)">Crude Oil Trader — Sharpe Ratio with Drawdown Penalty</span></div>
+    <p>Each organism's genome encodes ten strategy parameters (all raw values in [0, 1] before scaling). A full backtest is run against a synthetic WTI Crude Oil price series before the fitness score is computed. The ten parameters and their scaled ranges are:</p>
+    <div class="help-math">
+      fastEmaLen [0] → [3, 30] bars &nbsp;|&nbsp; slowEmaLen [1] → [10, 120] bars<br>
+      momentumThresh [2] → [0, 5%] of price &nbsp;|&nbsp; rsiLen [3] → [5, 30] bars<br>
+      rsiBuyThresh [4] → RSI [55, 85] &nbsp;|&nbsp; rsiSellThresh [5] → RSI [15, 45]<br>
+      strikeOffset [6] → [1%, 10%] OTM &nbsp;|&nbsp; optionDTE [7] → [7, 45] days<br>
+      positionSize [8] → [5%, 100%] of account &nbsp;|&nbsp; stopLoss [9] → [1%, 15%] loss
+    </div>
+    <p>The backtest runs two concurrent mechanisms. The <strong>futures momentum signal</strong> compares a fast and slow EMA: when the fast EMA exceeds the slow by more than <em>momentumThresh</em> the strategy goes long one futures contract (100 barrels); crossing below triggers a short. Positions are closed immediately if the mark-to-market loss exceeds <em>stopLoss × account</em>. The <strong>options overlay</strong> sells an out-of-the-money call when RSI rises above <em>rsiBuyThresh</em> (collecting premium, capping upside) and sells an OTM put when RSI falls below <em>rsiSellThresh</em> (collecting premium, accepting assignment risk). Option premiums are priced with Black-Scholes using the 20-bar realised historical volatility as the implied volatility input. Only one option position is held at a time; it settles at expiry with full mark-to-market accounting.</p>
+    <p>The fitness function is:</p>
+    <div class="help-math">
+      fitness = sigmoid( Sharpe × max(0, 1 − 2 · maxDrawdown) / 2 )
+    </div>
+    <p>where <em>Sharpe</em> is the annualised Sharpe ratio of daily excess returns (net of the risk-free rate), and the drawdown factor penalises strategies that lose more than 50% of peak equity. The sigmoid maps the result to (0, 1): a Sharpe of 0 maps to ≈ 0.50, a Sharpe of 2 with low drawdown maps to ≈ 0.73, and a Sharpe of 5 maps above 0.90.</p>
+    <p><strong>Good genes for this problem:</strong> Genes that make small, continuous adjustments to parameter values are ideal — <code>gradientNudge</code> and <code>gaussianNoise</code> explore the neighbourhood of good threshold combinations without jumping to wildly different strategies. <code>elitePull</code> is useful for converging position sizing and stop-loss parameters once profitable threshold regions are found.</p>
+    <p><strong>Problematic genes:</strong> <code>bitFlip</code> and <code>mirrorFold</code> are particularly harmful here — large random jumps in EMA length or RSI threshold parameters completely change the trading signal timing and produce uncorrelated P&amp;L curves that obscure the fitness gradient. <code>rankSort</code> is destructive because ordinal rank has no meaningful relationship to the scaled parameter values — a rank of 1 does not imply a short EMA.</p>
   </div>
 
   <div class="help-item">
