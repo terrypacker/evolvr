@@ -25,11 +25,11 @@ import { Population } from './engine.js';
 import { OrganismTypes } from './organism.js';
 import { GeneRegistry } from './genes.js';
 import { Problems } from './problems.js';
-import { PF } from './peakFinder.js';
-import { KS } from './binaryKnapsack.js';
-import { FA } from './functionApproximation.js';
-import { TSP } from './travelingSalesman.js';
-import { COT } from './crudeOilTrader.js';
+import { PF } from './problems/peakFinder.js';
+import { KS } from './problems/binaryKnapsack.js';
+import { FA } from './problems/functionApproximation.js';
+import { TSP } from './problems/travelingSalesman.js';
+import { COT } from './problems/crudeOilTrader.js';
 
 import {
   openOrganismList,

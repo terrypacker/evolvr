@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Problem } from './problems.js';
+import { Problem } from '../problems.js';
 
 /* ── PROBLEM: PEAK FINDER ──────────────────────────────────── */
 class PeakFinder extends Problem {

@@ -16,8 +16,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Problem } from './problems.js';
-import { PolyFit } from './polyfit.js';
+import { Problem } from '../problems.js';
+import { PolyFit } from '../polyfit.js';
 
 /* ── PROBLEM: FUNCTION APPROXIMATION ─────────────────────── */
 class FunctionApproximation extends Problem {

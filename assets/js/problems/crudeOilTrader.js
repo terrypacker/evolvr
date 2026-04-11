@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Problem } from './problems.js';
+import { Problem } from '../problems.js';
 
 /* ── CRUDE OIL FUTURES OPTIONS TRADER ────────────────────────────────────────
  *
@@ -454,13 +454,14 @@ class CrudeOilTrader extends Problem {
   }
 
   regenerate(args) {
-    // args[0] = numBars, args[1] = seed, args[2] = startPrice
+    // args[0] = initialAccount, args[1] = numBars, args[2] = startPrice
+    // args[3] = seed, args[4] = riskFreeRate
     const numBarsIdx   = this.settings.findIndex(s => s.id === 'numBars');
     const seedIdx      = this.settings.findIndex(s => s.id === 'seed');
     const startPriceIdx= this.settings.findIndex(s => s.id === 'startPrice');
-    if (args[0] !== undefined && numBarsIdx >= 0)    this.settings[numBarsIdx].value    = args[0];
-    if (args[1] !== undefined && seedIdx >= 0)       this.settings[seedIdx].value       = args[1];
-    if (args[2] !== undefined && startPriceIdx >= 0) this.settings[startPriceIdx].value = args[2];
+    if (args[0] !== undefined && numBarsIdx >= 0)    this.settings[numBarsIdx].value    = args[numBarsIdx];
+    if (args[1] !== undefined && seedIdx >= 0)       this.settings[seedIdx].value       = args[seedIdx];
+    if (args[2] !== undefined && startPriceIdx >= 0) this.settings[startPriceIdx].value = args[startPriceIdx];
     this._cache = null; // force rebuild
   }
 
