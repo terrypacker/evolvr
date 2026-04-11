@@ -459,7 +459,8 @@ function updatePopList(organisms, best) {
         if (isBest) popRow.classList.add('pop-row-best');
         popRow.dataset.orgId = org.id;
         popRow.addEventListener('click', (evt) => {
-          openOrganismEditor(Number(evt.currentTarget.dataset.orgId), evt,() => updatePopList(state.population.organisms, state.population.bestOrganism))
+          const organism = state.population.getOrganism(Number(evt.currentTarget.dataset.orgId))
+          openOrganismEditor(organism, evt,() => updatePopList(state.population.organisms, state.population.bestOrganism))
         });
 
         //ID Column

@@ -599,8 +599,7 @@ return genome.map(v => Math.max(0, Math.min(1, v + (Math.random() - 0.5) * 0.1))
 /* ══════════════════════════════════════════════════════════════
    ORGANISM EDITOR
    ══════════════════════════════════════════════════════════════ */
-export function openOrganismEditor(organismId, evt, onChanged) {
-  const organism = state.population.getOrganism(organismId);
+export function openOrganismEditor(organism, evt, onChanged) {
   const isEdit = true; //Edit or Create
 
   const selectedGenes = new Set();
@@ -632,7 +631,17 @@ export function openOrganismEditor(organismId, evt, onChanged) {
   const organismLogs = organism?.log.slice(0, 12).map(e =>
       `<div class="log-entry"><span class="log-gen">A${e.age}</span> ${e.msg}</div>`
   ).join('');
-  const lastMate = state.population.getOrganism(organism.mate);
+  let lastMateInfo;
+  if(organism.mate) {
+    const lastMate = state.population.getOrganism(organism.mate);
+    if(lastMate) {
+      lastMateInfo = lastMate.id;
+    }else {
+      lastMateInfo = 'Dead';
+    }
+  }else {
+    lastMateInfo = 'None';
+  }
 
   const bodyHTML = `
     <div class="modal-form">
@@ -667,9 +676,7 @@ export function openOrganismEditor(organismId, evt, onChanged) {
       </div>
       <div class="field-group">
         <label >Mate <span style="color:var(--text-muted)">(Most recent organism mated with)</span></label>
-        <div 
-          style="opacity:0.5;cursor:not-allowed">
-          ${lastMate?.id ?? 'None'}</div>
+        <div style="opacity:0.5; cursor:not-allowed">${lastMateInfo}</div>
       </div>
       <div class="field-group">
         <label >Type <span style="color:var(--text-muted)">(Organism type at birth)</span></label>
@@ -840,7 +847,8 @@ export function openAchievedOrganisms(evt) {
   const rows = overlay.querySelectorAll('[data-org-id]');
   rows.forEach(r => {
     r.addEventListener('click', (evt) => {
-      openOrganismEditor(Number( r.getAttribute('data-org-id')), evt,() => {});
+      const organism = state.population.getOrganismAchievedGoal(Number( r.getAttribute('data-org-id')));
+      openOrganismEditor(organism, evt,() => {});
     });
   });
 

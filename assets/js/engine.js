@@ -274,6 +274,10 @@ export class Population {
     return this.organisms.findLast((org) => org.id === id);
   }
 
+  getOrganismAchievedGoal(id) {
+    return this.organismsAchievedGoal.get(id);
+  }
+
   deleteOrganism(id) {
     const index = this.organisms.findIndex(org => org.id === id);
     if (index !== -1) {
